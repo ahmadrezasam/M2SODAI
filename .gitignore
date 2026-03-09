@@ -1,0 +1,4 @@
+work_dirs
+data
+*.pyc
+*.pth
