@@ -5,6 +5,13 @@ _base_ = [
     '../_base_/default_runtime.py'
 ]
 
+load_from = 'work_dirs/faster_rcnn_r50_rgb/rgb_projected.pth'
+
+custom_imports = dict(
+    imports=['tools_new.freeze_hook'],
+    allow_failed_imports=False
+)
+
 norm_cfg = dict(type='GN', num_groups=32, requires_grad=True)
 
 model = dict(
@@ -23,7 +30,6 @@ model = dict(
             norm_cfg=norm_cfg,
             zero_init_residual=False,
             norm_eval=True, 
-            init_cfg=None,
             style='pytorch'
         )
     ),
@@ -131,3 +137,7 @@ model = dict(
             max_per_img=100)
     )
 )
+
+custom_hooks = [
+    dict(type='FreezeExceptProjectorHook')
+]

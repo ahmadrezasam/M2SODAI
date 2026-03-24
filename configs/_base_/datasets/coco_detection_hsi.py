@@ -16,7 +16,8 @@ train_pipeline = [
     dict(type='LoadImageFromHSI'),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='Resize', img_scale=(224, 224), keep_ratio=True),
+    # dict(type='Resize', img_scale=(224, 224), keep_ratio=True), # Original settings
+    dict(type='Resize', img_scale=(1600, 1600), keep_ratio=True), # It is needed for the 1x1 projector to work properly
     #dict(type='MinIoURandomCrop', min_ious=(0.5, 0.7,0.9)),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
@@ -27,7 +28,8 @@ test_pipeline = [
     dict(type='LoadImageFromHSI'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(224, 224),
+        # img_scale=(224, 224),   # Original settings
+        img_scale=(1600, 1600), # It is needed for the 1x1 projector to work properly
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),

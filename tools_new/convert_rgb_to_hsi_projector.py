@@ -22,14 +22,19 @@ def convert_weights(src_path, dst_path):
         else:
             new_state_dict[k] = v
             
-    # Initialize the 1x1 projector to average the 30 bands
-    # shape: [out_channels, in_channels, kernel_size, kernel_size] = [3, 30, 1, 1]
-    print("Initializing 1x1 channel projector weights with band averaging...")
+    # Initialize the Sequential 1x1 projector (Conv + BN) to average the 30 bands
+    # backbone.channel_projector.0 is the Conv2d(30, 3, bias=False)
+    # backbone.channel_projector.1 is the BatchNorm2d(3)
+    print("Initializing Sequential 1x1 channel projector (Conv + BN) with band averaging...")
     projector_weight = torch.ones(3, 30, 1, 1) / 30.0
-    projector_bias = torch.zeros(3)
     
-    new_state_dict['backbone.channel_projector.weight'] = projector_weight
-    new_state_dict['backbone.channel_projector.bias'] = projector_bias
+    new_state_dict['backbone.channel_projector.0.weight'] = projector_weight
+    
+    # Initialize BatchNorm to identity
+    new_state_dict['backbone.channel_projector.1.weight'] = torch.ones(3)
+    new_state_dict['backbone.channel_projector.1.bias'] = torch.zeros(3)
+    new_state_dict['backbone.channel_projector.1.running_mean'] = torch.zeros(3)
+    new_state_dict['backbone.channel_projector.1.running_var'] = torch.ones(3)
     
     if 'state_dict' in checkpoint:
         checkpoint['state_dict'] = new_state_dict
