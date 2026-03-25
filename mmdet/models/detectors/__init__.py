@@ -9,8 +9,8 @@ from .cornernet import CornerNet
 from .deformable_detr import DeformableDETR
 from .detr import DETR
 from .fast_rcnn import FastRCNN
-from .faster_rcnn import FasterRCNN
-from .faster_rcnn import FasterRCNNDFPN
+from .faster_rcnn import FasterRCNN, FasterRCNNDFPN
+from .joint_modality_detector import JointModalityDetector
 from .fcos import FCOS
 from .fovea import FOVEA
 from .fsaf import FSAF
@@ -61,6 +61,7 @@ __all__ = [
     'TwoStagePanopticSegmentor', 'PanopticFPN', 'QueryInst', 'LAD',
     'MaskFormer', 'Mask2Former', 'BaseDetectorFinal', 
     'TwoStageDetectorDFPN', 'FasterRCNNDFPN',
+    'JointModalityDetector',
     #  'LightThreeStreamUncertainty', 'Detfusion',
     
 ]
