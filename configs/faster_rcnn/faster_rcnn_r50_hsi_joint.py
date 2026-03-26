@@ -27,6 +27,7 @@ model = dict(
             frozen_stages=-1,
             norm_cfg=norm_cfg,
             zero_init_residual=False,
+            with_cp=True,
             norm_eval=True, 
             style='pytorch'
         )
@@ -36,6 +37,7 @@ model = dict(
         in_channels=[256, 512, 1024, 2048],
         out_channels=256,
         num_outs=5,
+        with_cp=False,
         norm_cfg=norm_cfg
     ),
     rpn_head=dict(
@@ -146,6 +148,7 @@ data = dict(
 # Optimizer
 optimizer = dict(type='SGD', lr=0.002, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
+checkpoint_config = dict(interval=1)
 # learning policy
 lr_config = dict(
     policy='step',

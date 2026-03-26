@@ -67,78 +67,86 @@ class JointModalityDetector(TwoStageDetector):
             img (Tensor): RGB images (N, 3, H, W).
             hsi (Tensor, optional): HSI cubes (N, C_hsi, H_hsi, W_hsi).
         """
-        # 1. RGB Branch (Source Supervision)
-        x_rgb = self.extract_feat(img, modality='rgb')
-        losses = dict()
+        batch_size = img.shape[0]
+        
+        # 1. Prepare inputs for concatenated forward pass
+        if hsi is not None:
+            # HSI passes through projector + upsampling
+            hsi_projected = self.backbone.channel_projector(hsi)
+            if self.backbone.target_size and hsi_projected.shape[2:] != tuple(self.backbone.target_size):
+                hsi_projected = F.interpolate(hsi_projected, size=self.backbone.target_size, 
+                                            mode='bilinear', align_corners=False)
+            joint_img = torch.cat([img, hsi_projected], dim=0)
+        else:
+            joint_img = img
 
-        # RPN for RGB
+        # 2. Extract features once for the joint batch
+        if hasattr(self.backbone, 'resnet'):
+            x_joint = self.backbone.resnet(joint_img)
+        else:
+            x_joint = self.backbone(joint_img)
+            
+        if self.with_neck:
+            x_joint = self.neck(x_joint)
+        
+        # 3. Split features back into RGB and HSI
+        if hsi is not None:
+            x_rgb = [f[:batch_size] for f in x_joint]
+            x_hsi = [f[batch_size:] for f in x_joint]
+        else:
+            x_rgb = x_joint
+            x_hsi = None
+
+        losses = dict()
+        
+        # 4. Concatenate targets for Heads if HSI is present
+        if hsi is not None:
+            # We use co-reg labels for both modalities
+            gt_bboxes_head = gt_bboxes + gt_bboxes
+            gt_labels_head = gt_labels + gt_labels
+            img_metas_head = img_metas + img_metas
+            # Handle gt_bboxes_ignore and gt_masks if they exist
+            gt_bboxes_ignore_head = gt_bboxes_ignore + gt_bboxes_ignore if gt_bboxes_ignore is not None else None
+            gt_masks_head = gt_masks + gt_masks if gt_masks is not None else None
+        else:
+            gt_bboxes_head = gt_bboxes
+            gt_labels_head = gt_labels
+            img_metas_head = img_metas
+            gt_bboxes_ignore_head = gt_bboxes_ignore
+            gt_masks_head = gt_masks
+
+        # 5. RPN Forward and Loss (Joint)
         if self.with_rpn:
             proposal_cfg = self.train_cfg.get('rpn_proposal', self.test_cfg.rpn)
-            rpn_losses_rgb, proposal_list_rgb = self.rpn_head.forward_train(
-                x_rgb, img_metas, gt_bboxes, gt_labels=None,
-                gt_bboxes_ignore=gt_bboxes_ignore, proposal_cfg=proposal_cfg, **kwargs)
-            # Rename RGB losses to avoid conflict if needed, or just update
-            losses.update(rpn_losses_rgb)
+            rpn_losses, proposal_list = self.rpn_head.forward_train(
+                x_joint, img_metas_head, gt_bboxes_head, gt_labels=None,
+                gt_bboxes_ignore=gt_bboxes_ignore_head, proposal_cfg=proposal_cfg, **kwargs)
+            losses.update(rpn_losses)
         else:
-            proposal_list_rgb = proposals
+            proposal_list = proposals
 
-        # ROI for RGB
-        roi_losses_rgb = self.roi_head.forward_train(
-            x_rgb, img_metas, proposal_list_rgb, gt_bboxes, gt_labels,
-            gt_bboxes_ignore, gt_masks, **kwargs)
-        losses.update(roi_losses_rgb)
+        # 6. ROI Forward and Loss (Joint)
+        roi_losses = self.roi_head.forward_train(
+            x_joint, img_metas_head, proposal_list, gt_bboxes_head, gt_labels_head,
+            gt_bboxes_ignore_head, gt_masks_head, **kwargs)
+        losses.update(roi_losses)
 
-        # 2. HSI Branch (Target Adaptation)
-        if hsi is not None:
-            x_hsi = self.extract_feat(hsi, modality='hsi')
-            
-            # Since HSI is co-registered and we want to adapt it, 
-            # we also compute detection losses for HSI using RGB labels.
-            # This is technically "supervised" by source labels, which is allowed in non-source-free DA.
-            # However, the user said "hsi should be unlabeled", so maybe we should only 
-            # use consistency or pseudo-labels? 
-            # Given they approved JOHDA which uses "Joint Loss", I will include HSI supervised loss
-            # but name them differently if needed. Actually, using shared heads means 
-            # the gradients will flow from both.
-            
-            # RPN for HSI
-            if self.with_rpn:
-                rpn_losses_hsi, _ = self.rpn_head.forward_train(
-                    x_hsi, img_metas, gt_bboxes, gt_labels=None,
-                    gt_bboxes_ignore=gt_bboxes_ignore, proposal_cfg=proposal_cfg, **kwargs)
-                for k, v in rpn_losses_hsi.items():
-                    losses[f'hsi_{k}'] = v
-            
-            # ROI for HSI
-            # Note: we use proposal_list_rgb or proposal_list_hsi? 
-            # For consistency, it's often better to use the same proposals or generate HSI proposals.
-            # Let's generate HSI proposals to train the HSI-RPN path.
-            if self.with_rpn:
-                _, proposal_list_hsi = self.rpn_head.forward_train(
-                    x_hsi, img_metas, gt_bboxes, gt_labels=None,
-                    gt_bboxes_ignore=gt_bboxes_ignore, proposal_cfg=proposal_cfg, **kwargs)
-            else:
-                proposal_list_hsi = proposals
-
-            roi_losses_hsi = self.roi_head.forward_train(
-                x_hsi, img_metas, proposal_list_hsi, gt_bboxes, gt_labels,
-                gt_bboxes_ignore, gt_masks, **kwargs)
-            for k, v in roi_losses_hsi.items():
-                losses[f'hsi_{k}'] = v
-
-            # 3. Cross-Modality Consistency Loss
-            # We enforce consistency at the feature level (neck output)
-            if self.consistency_weight > 0:
-                consistency_loss = 0
-                for feat_rgb, feat_hsi in zip(x_rgb, x_hsi):
-                    consistency_loss += F.mse_loss(feat_hsi, feat_rgb.detach())
-                losses['loss_consistency'] = consistency_loss * self.consistency_weight
+        # 7. Cross-Modality Consistency Loss
+        if hsi is not None and self.consistency_weight > 0:
+            consistency_loss = 0
+            # x_rgb and x_hsi are slices of x_joint features
+            for feat_rgb, feat_hsi in zip(x_rgb, x_hsi):
+                consistency_loss += F.mse_loss(feat_hsi, feat_rgb.detach())
+            losses['loss_consistency'] = consistency_loss * self.consistency_weight
 
         return losses
 
     def simple_test(self, img, img_metas, hsi=None, proposals=None, rescale=False):
         """Test with either RGB or HSI."""
         if hsi is not None:
+            # Handle list-wrapped HSI from data loader if necessary
+            if isinstance(hsi, list):
+                hsi = hsi[0]
             # If both are provided, we prefer HSI if we are testing HSI performance
             # or we could do ensemble. Here we follow the modality provided.
             x = self.extract_feat(hsi, modality='hsi')
