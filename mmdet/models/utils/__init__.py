@@ -14,6 +14,8 @@ from .point_sample import (get_uncertain_point_coords_with_randomness,
                            get_uncertainty)
 from .positional_encoding import (LearnedPositionalEncoding,
                                   SinePositionalEncoding)
+from .grl import GradientReversalLayer
+from .spectral_dropout import SpectralDropout
 from .res_layer import ResLayer, SimplifiedBasicBlock
 from .se_layer import DyReLU, SELayer
 from .transformer import (DetrTransformerDecoder, DetrTransformerDecoderLayer,
@@ -22,6 +24,7 @@ from .transformer import (DetrTransformerDecoder, DetrTransformerDecoderLayer,
 
 __all__ = [
     'ResLayer', 'gaussian_radius', 'gen_gaussian_target',
+    'GradientReversalLayer', 'SpectralDropout',
     'DetrTransformerDecoderLayer', 'DetrTransformerDecoder', 'Transformer',
     'build_transformer', 'build_linear_layer', 'SinePositionalEncoding',
     'LearnedPositionalEncoding', 'DynamicConv', 'SimplifiedBasicBlock',

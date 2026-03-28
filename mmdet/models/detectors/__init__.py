@@ -11,6 +11,10 @@ from .detr import DETR
 from .fast_rcnn import FastRCNN
 from .faster_rcnn import FasterRCNN, FasterRCNNDFPN
 from .joint_modality_detector import JointModalityDetector
+from .uda_joint_modality_detector import UDAJointModalityDetector
+from .uda_adversarial_detector import UDAAdversarialDetector
+from .zero_supervised_joint_detector import ZeroSupervisedJointDetector
+from .mean_teacher_uda_detector import MeanTeacherUDADetector
 from .fcos import FCOS
 from .fovea import FOVEA
 from .fsaf import FSAF
@@ -62,6 +66,10 @@ __all__ = [
     'MaskFormer', 'Mask2Former', 'BaseDetectorFinal', 
     'TwoStageDetectorDFPN', 'FasterRCNNDFPN',
     'JointModalityDetector',
+    'UDAJointModalityDetector',
+    'UDAAdversarialDetector',
+    'ZeroSupervisedJointDetector',
+    'MeanTeacherUDADetector',
     #  'LightThreeStreamUncertainty', 'Detfusion',
     
 ]

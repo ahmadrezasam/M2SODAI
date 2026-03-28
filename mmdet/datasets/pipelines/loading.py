@@ -118,6 +118,105 @@ class LoadImageFrom_JPG_HSI:
         return repr_str
 
 @PIPELINES.register_module()
+class LoadRawHSI:
+    """Load raw HSI from file (127 bands).
+
+    Required keys are "img_prefix" and "img_info".
+    Added keys are "hsi", "hsi_shape", "hsi_ori_shape", "hsi_fields".
+    """
+
+    def __init__(self,
+                 to_float32=False,
+                 file_client_args=dict(backend='disk')):
+        self.to_float32 = to_float32
+        self.file_client_args = file_client_args.copy()
+        self.file_client = None
+
+    def __call__(self, results):
+        if self.file_client is None:
+            self.file_client = mmcv.FileClient(**self.file_client_args)
+
+        if results['img_prefix'] is not None:
+            filename = osp.join(results['img_prefix'],
+                                results['img_info']['filename'])
+        else:
+            filename = results['img_info']['filename']
+
+        # Replace _coco (or _pca/etc) with empty to find raw .mat in base directory
+        # e.g., data/train_coco/0.jpg -> data/train/0.mat
+        filename_hsi = filename.replace('.jpg', '.mat')
+        filename_hsi = filename_hsi.replace('/JPEGImages', '')
+        filename_hsi = filename_hsi.replace('_coco', '')
+        filename_hsi = filename_hsi.replace('_pca', '')
+        filename_hsi = filename_hsi.replace('_rgb', '')
+
+        hsi = sio.loadmat(filename_hsi)['data']
+        if self.to_float32:
+            hsi = hsi.astype(np.float32)
+            
+        results['filename'] = filename_hsi
+        results['ori_filename'] = results['img_info']['filename']
+        results['hsi'] = hsi
+        results['hsi_fields'] = ['hsi']
+        
+        # Keep hsi shape for now, will be resized in ExtractRGBBandsFromHSI
+        results['img_shape'] = hsi.shape
+        results['ori_shape'] = hsi.shape
+        return results
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(to_float32={self.to_float32})'
+
+@PIPELINES.register_module()
+class ExtractRGBBandsFromHSI:
+    """Select 3 bands from HSI to represent RGB.
+    
+    Default indices for M2SODAI: R=53, G=32, B=11.
+    """
+
+    def __init__(self, r_idx=53, g_idx=32, b_idx=11, rescale_to_255=True, order='bgr'):
+        self.r_idx = r_idx
+        self.g_idx = g_idx
+        self.b_idx = b_idx
+        self.rescale_to_255 = rescale_to_255
+        self.order = order
+
+    def __call__(self, results):
+        if 'hsi' in results:
+            hsi = results['hsi']
+            # Select bands. Default order is BGR to match mmdet standard behavior
+            if self.order.lower() == 'bgr':
+                indices = [self.b_idx, self.g_idx, self.r_idx]
+            else:
+                indices = [self.r_idx, self.g_idx, self.b_idx]
+            
+            rgb = hsi[:, :, indices].astype(np.float32)
+            
+            if self.rescale_to_255:
+                # Per-image min-max scaling to [0, 255] for better compatibility
+                r_min, r_max = rgb.min(), rgb.max()
+                if r_max > r_min:
+                    rgb = (rgb - r_min) / (r_max - r_min) * 255.0
+                else:
+                    rgb = rgb * 255.0 # Fallback
+            
+            # Resize resulting pseudo-RGB to match target annotation space (1600, 1600)
+            # This ensures Resize transforms later see 1600->1600 (scale_factor=1.0)
+            target_shape = (1600, 1600)
+            rgb = mmcv.imresize(rgb, target_shape, interpolation='bicubic')
+            rgb = np.clip(rgb, 0, 255)
+            
+            results['img'] = rgb
+            results['img_shape'] = rgb.shape
+            results['ori_shape'] = rgb.shape
+            results['img_fields'] = ['img']
+        return results
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'r_idx={self.r_idx}, g_idx={self.g_idx}, b_idx={self.b_idx})')
+
+@PIPELINES.register_module()
 class LoadImageFromHSI:
     """Load an image from file.
 
