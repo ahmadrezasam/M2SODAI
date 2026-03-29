@@ -1,0 +1,7 @@
+names:
+  0: ship
+  1: floatingmatter
+path: /home/ahmadreza/Downloads/Research/M2SODAI/data/yolo_rgb
+test: test/images
+train: train/images
+val: val/images
