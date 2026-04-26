@@ -1,0 +1,6 @@
+# Fold 3 - 3-fold CV for lower bound baseline
+path: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_3
+train: train/images
+val: val/images
+nc: 1
+names: ['ship']

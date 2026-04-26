@@ -1,0 +1,10 @@
+[34m[1mval: [0mdata=baseline_official/test_rgb_optical.yaml, weights=['baseline_official/runs/seed42/fold_2/weights/best.pt'], batch_size=32, imgsz=224, conf_thres=0.001, iou_thres=0.6, max_det=300, task=val, device=, workers=8, single_cls=True, augment=False, verbose=True, save_txt=False, save_hybrid=False, save_conf=False, save_json=False, project=yolov5_official/runs/val, name=seed42_fold2_final, exist_ok=True, half=False, dnn=False
+YOLOv5 🚀 v7.0-467-g1d62daa3 Python-3.13.11 torch-2.10.0+cu128 CUDA:0 (NVIDIA GeForce RTX 2080 Ti, 10818MiB)
+
+Fusing layers... 
+YOLOv5s summary: 157 layers, 7012822 parameters, 0 gradients, 15.8 GFLOPs
+[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/data/test_rgb/labels.cache... 108 images, 17 backgrounds, 0 corrupt: 100%|██████████| 125/125 [00:00<?, ?it/s][34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/data/test_rgb/labels.cache... 108 images, 17 backgrounds, 0 corrupt: 100%|██████████| 125/125 [00:00<?, ?it/s]
+                 Class     Images  Instances          P          R      mAP50   mAP50-95:   0%|          | 0/4 [00:00<?, ?it/s]                 Class     Images  Instances          P          R      mAP50   mAP50-95:  25%|██▌       | 1/4 [00:00<00:02,  1.09it/s]                 Class     Images  Instances          P          R      mAP50   mAP50-95:  50%|█████     | 2/4 [00:01<00:01,  1.65it/s]                 Class     Images  Instances          P          R      mAP50   mAP50-95:  75%|███████▌  | 3/4 [00:01<00:00,  2.02it/s]                 Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 4/4 [00:01<00:00,  2.33it/s]                 Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 4/4 [00:01<00:00,  2.00it/s]
+                   all        125        466      0.705      0.466      0.534      0.216
+Speed: 0.3ms pre-process, 3.8ms inference, 2.9ms NMS per image at shape (32, 3, 224, 224)
+Results saved to [1myolov5_official/runs/val/seed42_fold2_final[0m

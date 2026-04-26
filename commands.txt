@@ -1,0 +1,12 @@
+python3 yolov5_official/train.py \
+    --weights yolov5s.pt \
+    --data baseline_official/fold_1.yaml \
+    --hyp baseline_official/hyp_paper.yaml \
+    --img 640 \
+    --batch-size 8 \
+    --epochs 300 \
+    --patience 100 \
+    --single-cls \
+    --project baseline_official/runs \
+    --name fold_1_640 \
+    --exist-ok

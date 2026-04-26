@@ -32,7 +32,7 @@ The three parallel 3D convolution branches (`nets1`, `nets2`, `nets3`) that proc
 **Before:**
 ```python
 def forward(self, x):
-    x = torch.cat([self.nets1(x.unsqueeze(1)),
+    x = torch.cat([self.nets1(x.unsqueeze(1)), 
                     self.nets2(x.unsqueeze(1)),
                     self.nets3(x.unsqueeze(1))], dim=1)
     x = self.convnet(x)

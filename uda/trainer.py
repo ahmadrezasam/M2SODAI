@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
-from ultralytics.utils.ops import non_max_suppression
+from ultralytics.utils.nms import non_max_suppression
 from uda.augmentations import weak_augmentation, strong_augmentation
 from uda.pseudo_label import PseudoLabelFilter
 

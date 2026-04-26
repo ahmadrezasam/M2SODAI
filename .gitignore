@@ -3,3 +3,15 @@ data
 *.pyc
 *.pth
 .venv/
+baseline_official/fold_1
+baseline_official/fold_2
+baseline_official/fold_3
+baseline_official/test_hsi_pca
+*.jpg
+*.png
+*.pt
+
+
+----------
+uda
+repro_uda
