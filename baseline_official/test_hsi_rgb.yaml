@@ -1,5 +1,5 @@
 # Test config for hsi_rgb
-path: /home/ahmadreza/Downloads/Research/M2SODAI/data/test_rgb
+path: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/test_hsi_rgb
 train: images  # not used for testing
 val: images
 nc: 1
