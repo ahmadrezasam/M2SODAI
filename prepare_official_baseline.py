@@ -21,7 +21,7 @@ import scipy.io as sio
 import cv2
 from tqdm import tqdm
 from sklearn.decomposition import PCA
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
 import shutil
 
 PROJECT_ROOT = "/home/ahmadreza/Downloads/Research/M2SODAI"
@@ -104,11 +104,15 @@ def prepare_optical_data():
     print(f"  Images with ship annotations: {imgs_with_ships}")
     print(f"  Background images (no ships): {len(all_images) - imgs_with_ships}")
     
-    # Create 3-fold CV splits
+    # Create 3-fold CV splits using StratifiedKFold to reduce variance
+    # Stratify by number of ships per image (capped at 5 to ensure valid splits)
     basenames = [e['basename'] for e in all_images]
-    kf = KFold(n_splits=3, shuffle=True, random_state=42)
+    ship_counts = [len(e['anns']) for e in all_images]
+    strat_labels = [min(c, 5) for c in ship_counts]
     
-    for fold_idx, (train_indices, val_indices) in enumerate(kf.split(basenames)):
+    kf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+    
+    for fold_idx, (train_indices, val_indices) in enumerate(kf.split(basenames, strat_labels)):
         fold_num = fold_idx + 1
         print(f"\n  Fold {fold_num}: {len(train_indices)} train, {len(val_indices)} val")
         
@@ -361,6 +365,11 @@ def verify_data():
 
 
 if __name__ == "__main__":
+
+    """
+    NEVER run this function again!!!
+    It deletes all my runs
+    """
     # Clean start
     # if os.path.exists(OUTPUT_ROOT):
     #     print(f"Removing existing {OUTPUT_ROOT}")

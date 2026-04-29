@@ -1,0 +1,5 @@
+path: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/test_hsi_rgb_640_v3_bilinear
+train: images
+val: images
+nc: 1
+names: ['ship']
