@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/ahmadreza/Downloads/Research/M2SODAI/train_rtdetr_cv.py", line 5, in <module>
+    from transformers import RTDetrV2ForObjectDetection
+ModuleNotFoundError: No module named 'transformers'

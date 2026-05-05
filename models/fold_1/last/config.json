@@ -1,0 +1,93 @@
+{
+  "activation_dropout": 0.0,
+  "activation_function": "relu",
+  "architectures": [
+    "DeformableDetrForObjectDetection"
+  ],
+  "attention_dropout": 0.0,
+  "auxiliary_loss": false,
+  "backbone_config": {
+    "backbone": "vit_small_patch16_dinov3.lvd1689m",
+    "features_only": true,
+    "freeze_batch_norm_2d": false,
+    "model_type": "timm_backbone",
+    "num_channels": 3,
+    "out_features": [
+      "blocks.2",
+      "blocks.3",
+      "blocks.4"
+    ],
+    "out_indices": [
+      2,
+      3,
+      4
+    ],
+    "output_stride": null,
+    "stage_names": [
+      "blocks.0",
+      "blocks.1",
+      "blocks.2",
+      "blocks.3",
+      "blocks.4",
+      "blocks.5",
+      "blocks.6",
+      "blocks.7",
+      "blocks.8",
+      "blocks.9",
+      "blocks.10",
+      "blocks.11"
+    ],
+    "use_pretrained_backbone": false
+  },
+  "bbox_cost": 5,
+  "bbox_loss_coefficient": 5,
+  "class_cost": 1,
+  "d_model": 256,
+  "decoder_attention_heads": 8,
+  "decoder_ffn_dim": 1024,
+  "decoder_layers": 6,
+  "decoder_n_points": 4,
+  "dice_loss_coefficient": 1,
+  "dilation": false,
+  "disable_custom_kernels": false,
+  "dropout": 0.1,
+  "dtype": "float32",
+  "encoder_attention_heads": 8,
+  "encoder_ffn_dim": 1024,
+  "encoder_layerdrop": 0.0,
+  "encoder_layers": 6,
+  "encoder_n_points": 4,
+  "eos_coefficient": 0.1,
+  "focal_alpha": 0.25,
+  "giou_cost": 2,
+  "giou_loss_coefficient": 2,
+  "id2label": {
+    "0": "LABEL_0"
+  },
+  "ignore_mismatched_sizes": true,
+  "init_std": 0.02,
+  "init_xavier_std": 1.0,
+  "is_encoder_decoder": true,
+  "label2id": {
+    "LABEL_0": 0
+  },
+  "mask_loss_coefficient": 1,
+  "max_position_embeddings": 1024,
+  "model_type": "deformable_detr",
+  "num_channels": 3,
+  "num_feature_levels": 4,
+  "num_queries": 300,
+  "out_indices": [
+    3,
+    6,
+    9,
+    11
+  ],
+  "position_embedding_type": "sine",
+  "return_intermediate": true,
+  "tie_word_embeddings": true,
+  "transformers_version": "5.7.0",
+  "two_stage": false,
+  "two_stage_num_proposals": 300,
+  "with_box_refine": false
+}

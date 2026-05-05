@@ -1,0 +1,14 @@
+angle: 1.0
+box: 7.5
+cls: 0.5
+degrees: 0.0
+dfl: 1.5
+fliplr: 0.5
+lr0: 0.01
+lrf: 0.1
+mixup: 0.1
+momentum: 0.937
+mosaic: 1.0
+scale: 0.9
+warmup_epochs: 3.0
+weight_decay: 0.0005

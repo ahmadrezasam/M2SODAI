@@ -1,0 +1,14 @@
+nohup: ignoring input
+
+==================================================
+RESUMING/STARTING TRAINING FOR FOLD 1
+==================================================
+
+Traceback (most recent call last):
+  File "/home/ahmadreza/Downloads/Research/M2SODAI/train_rtdetr_cv.py", line 58, in <module>
+    train_rtdetr_3fold()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/ahmadreza/Downloads/Research/M2SODAI/train_rtdetr_cv.py", line 37, in train_rtdetr_3fold
+    data=data_yaml,
+         ^^^^^^^^^
+NameError: name 'data_yaml' is not defined

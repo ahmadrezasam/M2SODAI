@@ -1,0 +1,314 @@
+
+     Epoch    GPU_mem       Loss  Instances       Size
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+New best model saved to models/fold_1/best (mAP50: 0.0000)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+New best model saved to models/fold_1/best (mAP50: 0.0001)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0005     0.0001
+
+New best model saved to models/fold_1/best (mAP50: 0.0005)
+
+     Epoch    GPU_mem       Loss  Instances       Size
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+New best model saved to models/fold_1/best (mAP50: 0.0000)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+New best model saved to models/fold_1/best (mAP50: 0.0000)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0001
+
+New best model saved to models/fold_1/best (mAP50: 0.0002)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0003     0.0001
+
+New best model saved to models/fold_1/best (mAP50: 0.0003)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0099     0.0040
+
+New best model saved to models/fold_1/best (mAP50: 0.0099)
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0005     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0003     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0004     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0005     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0003     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0003     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0017     0.0005
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0007     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0004     0.0002
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0000     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0001     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0002     0.0000
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0004     0.0001
+
+
+     Class     Images  Instances      mAP50   mAP50-95
+       all        371       1487     0.0006     0.0002
+
+
+     Class     Images  Instances      mAP50   mAP50-95
