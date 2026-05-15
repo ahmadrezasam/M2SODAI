@@ -1,0 +1,8 @@
+path: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official
+train: 
+  - fold_1_obb/train/images
+  - train_hsi_unlabeled_v3_bilinear_round2/images
+val: test_hsi_rgb_640_v3_bilinear_obb/images
+nc: 1
+names:
+  0: ship

@@ -20,4 +20,7 @@ repro_uda
 
 baseline_official/test_hsi_rgb_640_v3_bilinear
 baseline_official/test_hsi_rgb_640_v3_bilinear_obb
+baseline_official/train_hsi_unlabeled_v3_bilinear
+baseline_official/train_hsi_unlabeled_v3_bilinear_round2
+baseline_official/hsi_rgb_640_v3_bilinear_obb
 mmdet/models/datasets/

@@ -1,0 +1,1246 @@
+2026-05-07 14:52:32,808 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.16 (default, Jan 17 2023, 22:20:44) [GCC 11.2.0]
+CUDA available: True
+GPU 0: NVIDIA GeForce RTX 2080 Ti
+CUDA_HOME: /usr
+NVCC: Build cuda_11.5.r11.5/compiler.30672275_0
+GCC: gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+PyTorch: 1.7.1+cu110
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.6.0 (Git Hash 5ef631a030a6f73131c77892041042805a06064f)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.0
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.8.2+cu110
+OpenCV: 4.13.0
+MMCV: 1.3.17
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.0
+MMDetection: 2.23.0+2544401
+------------------------------------------------------------
+
+2026-05-07 14:52:33,992 - mmdet - INFO - Distributed training: True
+2026-05-07 14:52:35,230 - mmdet - INFO - Config:
+norm_cfg = dict(type='GN', num_groups=32, requires_grad=True)
+model = dict(
+    type='FasterRCNN',
+    backbone=dict(
+        type='SwinTransformer',
+        embed_dims=96,
+        depths=[2, 2, 6, 2],
+        num_heads=[3, 6, 12, 24],
+        window_size=7,
+        mlp_ratio=4,
+        qkv_bias=True,
+        qk_scale=None,
+        drop_rate=0.0,
+        attn_drop_rate=0.0,
+        drop_path_rate=0.2,
+        patch_norm=True,
+        out_indices=(0, 1, 2, 3),
+        with_cp=False,
+        convert_weights=True,
+        init_cfg=dict(
+            type='Pretrained', checkpoint='orcn-swin-t-dota-latest.pth')),
+    neck=dict(
+        type='FPN',
+        in_channels=[96, 192, 384, 768],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0)),
+    roi_head=dict(
+        type='StandardRoIHead',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='Shared4Conv1FCBBoxHead',
+            conv_out_channels=256,
+            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=1,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0.0, 0.0, 0.0, 0.0],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            reg_class_agnostic=False,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=False,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            pos_weight=-1,
+            debug=False)),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.9),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.01,
+            nms=dict(type='soft_nms', iou_threshold=0.5, min_score=0.01),
+            max_per_img=100)))
+dataset_type = 'CocoDataset'
+data_root = '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
+    dict(
+        type='RandomFlip',
+        flip_ratio=0.5,
+        direction=['horizontal', 'vertical']),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(640, 640),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=4,
+    workers_per_gpu=4,
+    train=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/train/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/train/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
+            dict(
+                type='RandomFlip',
+                flip_ratio=0.5,
+                direction=['horizontal', 'vertical']),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ]),
+    val=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(640, 640),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(640, 640),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.05)
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=300)
+evaluation = dict(interval=10, metric='bbox')
+checkpoint_config = dict(interval=10, max_keep_ckpts=3)
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+custom_hooks = [
+    dict(
+        type='EarlyStoppingHook',
+        monitor='bbox_mAP',
+        patience=5,
+        min_delta=0.001)
+]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+work_dir = '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1'
+seed = 0
+deterministic = True
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2026-05-07 14:52:35,230 - mmdet - INFO - Set random seed to 42, deterministic: False
+2026-05-07 14:52:35,841 - mmdet - INFO - load checkpoint from local path: orcn-swin-t-dota-latest.pth
+2026-05-07 14:52:36,487 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2026-05-07 14:52:36,511 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2026-05-07 14:52:36,521 - mmdet - INFO - initialize Shared4Conv1FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+Name of parameter - Initialization information
+
+backbone.patch_embed.projection.weight - torch.Size([96, 3, 4, 4]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.projection.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.norm.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.norm.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm1.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 3]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.qkv.weight - torch.Size([288, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.qkv.bias - torch.Size([288]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.proj.weight - torch.Size([96, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.proj.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm2.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm2.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.0.0.weight - torch.Size([384, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.0.0.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.1.weight - torch.Size([96, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm1.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 3]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.qkv.weight - torch.Size([288, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.qkv.bias - torch.Size([288]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.proj.weight - torch.Size([96, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.proj.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm2.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm2.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.0.0.weight - torch.Size([384, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.0.0.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.1.weight - torch.Size([96, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.norm.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.norm.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.reduction.weight - torch.Size([192, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 6]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.qkv.weight - torch.Size([576, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.qkv.bias - torch.Size([576]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.proj.weight - torch.Size([192, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.proj.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm2.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm2.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.0.0.weight - torch.Size([768, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.0.0.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.1.weight - torch.Size([192, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 6]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.qkv.weight - torch.Size([576, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.qkv.bias - torch.Size([576]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.proj.weight - torch.Size([192, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.proj.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm2.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm2.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.0.0.weight - torch.Size([768, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.0.0.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.1.weight - torch.Size([192, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.norm.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.norm.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.reduction.weight - torch.Size([384, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.norm.weight - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.norm.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.reduction.weight - torch.Size([768, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm1.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 24]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.qkv.weight - torch.Size([2304, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.qkv.bias - torch.Size([2304]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.proj.weight - torch.Size([768, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.proj.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm2.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm2.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm1.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 24]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.qkv.weight - torch.Size([2304, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.qkv.bias - torch.Size([2304]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.proj.weight - torch.Size([768, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.proj.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm2.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm2.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm0.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm0.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm3.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm3.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+neck.lateral_convs.0.conv.weight - torch.Size([256, 96, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.0.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.1.conv.weight - torch.Size([256, 192, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.1.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.2.conv.weight - torch.Size([256, 384, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.2.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.3.conv.weight - torch.Size([256, 768, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.3.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.0.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.1.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.2.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.3.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+rpn_head.rpn_conv.weight - torch.Size([256, 256, 3, 3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_conv.bias - torch.Size([256]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.weight - torch.Size([3, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.bias - torch.Size([3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.weight - torch.Size([12, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.bias - torch.Size([12]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_cls.weight - torch.Size([2, 1024]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_cls.bias - torch.Size([2]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_reg.weight - torch.Size([4, 1024]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.fc_reg.bias - torch.Size([4]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.shared_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.0.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.0.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_fcs.0.weight - torch.Size([1024, 12544]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.shared_fcs.0.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+2026-05-07 14:52:37,031 - mmdet - INFO - Start running, host: ahmadreza@quartz, work_dir: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1
+2026-05-07 14:52:37,032 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(NORMAL      ) EarlyStoppingHook                  
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+2026-05-07 14:52:37,032 - mmdet - INFO - workflow: [('train', 1)], max: 300 epochs
+2026-05-07 14:52:37,032 - mmdet - INFO - Checkpoints will be saved to /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1 by HardDiskBackend.
+2026-05-07 14:53:10,162 - mmdet - INFO - Epoch [1][50/101]	lr: 9.890e-06, eta: 5:33:13, time: 0.661, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.6333, loss_rpn_bbox: 0.0117, loss_cls: 0.3059, acc: 95.1035, loss_bbox: 0.0663, loss: 1.0172
+2026-05-07 14:53:40,896 - mmdet - INFO - Epoch [1][100/101]	lr: 1.988e-05, eta: 5:21:01, time: 0.615, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.3002, loss_rpn_bbox: 0.0127, loss_cls: 0.1668, acc: 94.5566, loss_bbox: 0.1054, loss: 0.5850
+2026-05-07 14:54:14,954 - mmdet - INFO - Epoch [2][50/101]	lr: 3.007e-05, eta: 5:22:59, time: 0.666, data_time: 0.065, memory: 7277, loss_rpn_cls: 0.0915, loss_rpn_bbox: 0.0096, loss_cls: 0.1910, acc: 93.2256, loss_bbox: 0.1507, loss: 0.4427
+2026-05-07 14:54:45,624 - mmdet - INFO - Epoch [2][100/101]	lr: 4.006e-05, eta: 5:18:47, time: 0.613, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0719, loss_rpn_bbox: 0.0110, loss_cls: 0.2160, acc: 91.7695, loss_bbox: 0.1860, loss: 0.4850
+2026-05-07 14:55:19,969 - mmdet - INFO - Epoch [3][50/101]	lr: 5.025e-05, eta: 5:20:31, time: 0.671, data_time: 0.067, memory: 7277, loss_rpn_cls: 0.0558, loss_rpn_bbox: 0.0081, loss_cls: 0.2052, acc: 92.0557, loss_bbox: 0.1705, loss: 0.4396
+2026-05-07 14:55:50,837 - mmdet - INFO - Epoch [3][100/101]	lr: 6.024e-05, eta: 5:18:07, time: 0.617, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0441, loss_rpn_bbox: 0.0079, loss_cls: 0.2139, acc: 91.1768, loss_bbox: 0.1946, loss: 0.4605
+2026-05-07 14:56:25,238 - mmdet - INFO - Epoch [4][50/101]	lr: 7.043e-05, eta: 5:19:13, time: 0.672, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0427, loss_rpn_bbox: 0.0080, loss_cls: 0.2148, acc: 91.0771, loss_bbox: 0.1890, loss: 0.4544
+2026-05-07 14:56:56,146 - mmdet - INFO - Epoch [4][100/101]	lr: 8.042e-05, eta: 5:17:22, time: 0.618, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0357, loss_rpn_bbox: 0.0070, loss_cls: 0.2067, acc: 91.4756, loss_bbox: 0.1776, loss: 0.4269
+2026-05-07 14:57:30,579 - mmdet - INFO - Epoch [5][50/101]	lr: 9.061e-05, eta: 5:18:05, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0335, loss_rpn_bbox: 0.0074, loss_cls: 0.1989, acc: 91.6377, loss_bbox: 0.1712, loss: 0.4111
+2026-05-07 14:58:01,437 - mmdet - INFO - Epoch [5][100/101]	lr: 1.000e-04, eta: 5:16:27, time: 0.617, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0367, loss_rpn_bbox: 0.0066, loss_cls: 0.2059, acc: 91.2734, loss_bbox: 0.1784, loss: 0.4275
+2026-05-07 14:58:35,890 - mmdet - INFO - Epoch [6][50/101]	lr: 1.000e-04, eta: 5:16:58, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0286, loss_rpn_bbox: 0.0069, loss_cls: 0.1992, acc: 91.5967, loss_bbox: 0.1736, loss: 0.4082
+2026-05-07 14:59:06,822 - mmdet - INFO - Epoch [6][100/101]	lr: 1.000e-04, eta: 5:15:35, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0287, loss_rpn_bbox: 0.0056, loss_cls: 0.1862, acc: 91.9131, loss_bbox: 0.1601, loss: 0.3807
+2026-05-07 14:59:41,390 - mmdet - INFO - Epoch [7][50/101]	lr: 1.000e-04, eta: 5:15:59, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0265, loss_rpn_bbox: 0.0058, loss_cls: 0.1774, acc: 92.4170, loss_bbox: 0.1540, loss: 0.3637
+2026-05-07 15:00:12,361 - mmdet - INFO - Epoch [7][100/101]	lr: 1.000e-04, eta: 5:14:45, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0227, loss_rpn_bbox: 0.0058, loss_cls: 0.1771, acc: 92.4697, loss_bbox: 0.1550, loss: 0.3605
+2026-05-07 15:00:46,637 - mmdet - INFO - Epoch [8][50/101]	lr: 1.000e-04, eta: 5:14:48, time: 0.670, data_time: 0.065, memory: 7277, loss_rpn_cls: 0.0182, loss_rpn_bbox: 0.0049, loss_cls: 0.1528, acc: 93.4619, loss_bbox: 0.1344, loss: 0.3103
+2026-05-07 15:01:17,688 - mmdet - INFO - Epoch [8][100/101]	lr: 1.000e-04, eta: 5:13:43, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0217, loss_rpn_bbox: 0.0061, loss_cls: 0.1847, acc: 92.0596, loss_bbox: 0.1599, loss: 0.3724
+2026-05-07 15:01:52,122 - mmdet - INFO - Epoch [9][50/101]	lr: 1.000e-05, eta: 5:13:48, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0137, loss_rpn_bbox: 0.0039, loss_cls: 0.1470, acc: 93.7217, loss_bbox: 0.1261, loss: 0.2907
+2026-05-07 15:02:23,178 - mmdet - INFO - Epoch [9][100/101]	lr: 1.000e-05, eta: 5:12:46, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0161, loss_rpn_bbox: 0.0044, loss_cls: 0.1546, acc: 93.4814, loss_bbox: 0.1289, loss: 0.3041
+2026-05-07 15:02:57,745 - mmdet - INFO - Epoch [10][50/101]	lr: 1.000e-05, eta: 5:12:51, time: 0.676, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0172, loss_rpn_bbox: 0.0044, loss_cls: 0.1545, acc: 93.4477, loss_bbox: 0.1249, loss: 0.3010
+2026-05-07 15:03:28,638 - mmdet - INFO - Epoch [10][100/101]	lr: 1.000e-05, eta: 5:11:47, time: 0.618, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0111, loss_rpn_bbox: 0.0032, loss_cls: 0.1331, acc: 94.4062, loss_bbox: 0.1132, loss: 0.2605
+2026-05-07 15:03:29,435 - mmdet - INFO - Saving checkpoint at 10 epochs
+2026-05-07 15:04:09,347 - mmdet - INFO - Evaluating bbox...
+2026-05-07 15:04:14,157 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.273
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.677
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.146
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.038
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.210
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.347
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.447
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.447
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.447
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.034
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.398
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.521
+
+2026-05-07 15:04:14,167 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-07 15:04:14,167 - mmdet - INFO - Epoch(val) [10][371]	bbox_mAP: 0.2730, bbox_mAP_50: 0.6770, bbox_mAP_75: 0.1460, bbox_mAP_s: 0.0380, bbox_mAP_m: 0.2100, bbox_mAP_l: 0.3470, bbox_mAP_copypaste: 0.273 0.677 0.146 0.038 0.210 0.347
+2026-05-07 15:04:47,749 - mmdet - INFO - Epoch [11][50/101]	lr: 1.000e-05, eta: 5:11:42, time: 0.671, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0139, loss_rpn_bbox: 0.0036, loss_cls: 0.1428, acc: 93.9756, loss_bbox: 0.1206, loss: 0.2808
+2026-05-07 15:05:18,675 - mmdet - INFO - Epoch [11][100/101]	lr: 1.000e-05, eta: 5:10:42, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0142, loss_rpn_bbox: 0.0038, loss_cls: 0.1412, acc: 94.0488, loss_bbox: 0.1151, loss: 0.2742
+2026-05-07 15:05:53,122 - mmdet - INFO - Epoch [12][50/101]	lr: 1.000e-06, eta: 5:10:37, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0136, loss_rpn_bbox: 0.0037, loss_cls: 0.1464, acc: 93.8164, loss_bbox: 0.1245, loss: 0.2882
+2026-05-07 15:06:24,078 - mmdet - INFO - Epoch [12][100/101]	lr: 1.000e-06, eta: 5:09:40, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0142, loss_rpn_bbox: 0.0036, loss_cls: 0.1328, acc: 94.3358, loss_bbox: 0.1073, loss: 0.2580
+2026-05-07 15:06:58,580 - mmdet - INFO - Epoch [13][50/101]	lr: 1.000e-06, eta: 5:09:34, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0131, loss_rpn_bbox: 0.0037, loss_cls: 0.1439, acc: 93.8157, loss_bbox: 0.1191, loss: 0.2797
+2026-05-07 15:07:29,491 - mmdet - INFO - Epoch [13][100/101]	lr: 1.000e-06, eta: 5:08:38, time: 0.618, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0036, loss_cls: 0.1321, acc: 94.4001, loss_bbox: 0.1087, loss: 0.2559
+2026-05-07 15:08:03,974 - mmdet - INFO - Epoch [14][50/101]	lr: 1.000e-06, eta: 5:08:29, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0032, loss_cls: 0.1302, acc: 94.5610, loss_bbox: 0.1064, loss: 0.2513
+2026-05-07 15:08:34,951 - mmdet - INFO - Epoch [14][100/101]	lr: 1.000e-06, eta: 5:07:37, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0138, loss_rpn_bbox: 0.0039, loss_cls: 0.1473, acc: 93.7242, loss_bbox: 0.1247, loss: 0.2898
+2026-05-07 15:09:09,361 - mmdet - INFO - Epoch [15][50/101]	lr: 1.000e-06, eta: 5:07:24, time: 0.672, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0105, loss_rpn_bbox: 0.0031, loss_cls: 0.1268, acc: 94.6094, loss_bbox: 0.1088, loss: 0.2492
+2026-05-07 15:09:40,353 - mmdet - INFO - Epoch [15][100/101]	lr: 1.000e-06, eta: 5:06:34, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0152, loss_rpn_bbox: 0.0039, loss_cls: 0.1459, acc: 93.8242, loss_bbox: 0.1192, loss: 0.2842
+2026-05-07 15:10:14,905 - mmdet - INFO - Epoch [16][50/101]	lr: 1.000e-06, eta: 5:06:22, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0139, loss_rpn_bbox: 0.0036, loss_cls: 0.1419, acc: 94.0215, loss_bbox: 0.1147, loss: 0.2742
+2026-05-07 15:10:45,866 - mmdet - INFO - Epoch [16][100/101]	lr: 1.000e-06, eta: 5:05:32, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0129, loss_rpn_bbox: 0.0034, loss_cls: 0.1358, acc: 94.2002, loss_bbox: 0.1113, loss: 0.2634
+2026-05-07 15:11:20,390 - mmdet - INFO - Epoch [17][50/101]	lr: 1.000e-06, eta: 5:05:19, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0140, loss_rpn_bbox: 0.0037, loss_cls: 0.1464, acc: 93.8110, loss_bbox: 0.1207, loss: 0.2848
+2026-05-07 15:11:51,356 - mmdet - INFO - Epoch [17][100/101]	lr: 1.000e-06, eta: 5:04:30, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0114, loss_rpn_bbox: 0.0034, loss_cls: 0.1298, acc: 94.5107, loss_bbox: 0.1054, loss: 0.2500
+2026-05-07 15:12:25,855 - mmdet - INFO - Epoch [18][50/101]	lr: 1.000e-06, eta: 5:04:15, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0111, loss_rpn_bbox: 0.0031, loss_cls: 0.1323, acc: 94.3519, loss_bbox: 0.1087, loss: 0.2552
+2026-05-07 15:12:56,841 - mmdet - INFO - Epoch [18][100/101]	lr: 1.000e-06, eta: 5:03:27, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0136, loss_rpn_bbox: 0.0039, loss_cls: 0.1446, acc: 93.8662, loss_bbox: 0.1196, loss: 0.2817
+2026-05-07 15:13:31,334 - mmdet - INFO - Epoch [19][50/101]	lr: 1.000e-06, eta: 5:03:12, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0119, loss_rpn_bbox: 0.0034, loss_cls: 0.1406, acc: 94.0213, loss_bbox: 0.1181, loss: 0.2740
+2026-05-07 15:14:02,311 - mmdet - INFO - Epoch [19][100/101]	lr: 1.000e-06, eta: 5:02:25, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0036, loss_cls: 0.1382, acc: 94.1660, loss_bbox: 0.1127, loss: 0.2661
+2026-05-07 15:14:36,790 - mmdet - INFO - Epoch [20][50/101]	lr: 1.000e-06, eta: 5:02:08, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0123, loss_rpn_bbox: 0.0038, loss_cls: 0.1515, acc: 93.6784, loss_bbox: 0.1209, loss: 0.2886
+2026-05-07 15:15:07,791 - mmdet - INFO - Epoch [20][100/101]	lr: 1.000e-06, eta: 5:01:22, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0031, loss_cls: 0.1267, acc: 94.6406, loss_bbox: 0.1068, loss: 0.2481
+2026-05-07 15:15:08,571 - mmdet - INFO - Saving checkpoint at 20 epochs
+2026-05-07 15:15:48,436 - mmdet - INFO - Evaluating bbox...
+2026-05-07 15:15:53,047 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.283
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.691
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.166
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.034
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.222
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.359
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.454
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.454
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.454
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.034
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.401
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.534
+
+2026-05-07 15:15:53,056 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-07 15:15:53,057 - mmdet - INFO - Epoch(val) [20][371]	bbox_mAP: 0.2830, bbox_mAP_50: 0.6910, bbox_mAP_75: 0.1660, bbox_mAP_s: 0.0340, bbox_mAP_m: 0.2220, bbox_mAP_l: 0.3590, bbox_mAP_copypaste: 0.283 0.691 0.166 0.034 0.222 0.359
+2026-05-07 15:16:26,793 - mmdet - INFO - Epoch [21][50/101]	lr: 1.000e-06, eta: 5:01:04, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0032, loss_cls: 0.1243, acc: 94.7588, loss_bbox: 0.1017, loss: 0.2407
+2026-05-07 15:16:57,749 - mmdet - INFO - Epoch [21][100/101]	lr: 1.000e-06, eta: 5:00:18, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0132, loss_rpn_bbox: 0.0039, loss_cls: 0.1492, acc: 93.7676, loss_bbox: 0.1215, loss: 0.2878
+2026-05-07 15:17:32,285 - mmdet - INFO - Epoch [22][50/101]	lr: 1.000e-06, eta: 5:00:00, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0133, loss_rpn_bbox: 0.0038, loss_cls: 0.1423, acc: 93.8786, loss_bbox: 0.1136, loss: 0.2730
+2026-05-07 15:18:03,194 - mmdet - INFO - Epoch [22][100/101]	lr: 1.000e-06, eta: 4:59:14, time: 0.618, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0033, loss_cls: 0.1337, acc: 94.2773, loss_bbox: 0.1130, loss: 0.2617
+2026-05-07 15:18:37,666 - mmdet - INFO - Epoch [23][50/101]	lr: 1.000e-06, eta: 4:58:55, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0116, loss_rpn_bbox: 0.0031, loss_cls: 0.1257, acc: 94.6241, loss_bbox: 0.1053, loss: 0.2456
+2026-05-07 15:19:08,707 - mmdet - INFO - Epoch [23][100/101]	lr: 1.000e-06, eta: 4:58:11, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0124, loss_rpn_bbox: 0.0037, loss_cls: 0.1483, acc: 93.7373, loss_bbox: 0.1214, loss: 0.2858
+2026-05-07 15:19:43,256 - mmdet - INFO - Epoch [24][50/101]	lr: 1.000e-06, eta: 4:57:52, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0134, loss_rpn_bbox: 0.0039, loss_cls: 0.1361, acc: 94.2588, loss_bbox: 0.1079, loss: 0.2613
+2026-05-07 15:20:14,248 - mmdet - INFO - Epoch [24][100/101]	lr: 1.000e-06, eta: 4:57:09, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0126, loss_rpn_bbox: 0.0034, loss_cls: 0.1387, acc: 94.1832, loss_bbox: 0.1160, loss: 0.2706
+2026-05-07 15:20:48,704 - mmdet - INFO - Epoch [25][50/101]	lr: 1.000e-06, eta: 4:56:48, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0127, loss_rpn_bbox: 0.0036, loss_cls: 0.1426, acc: 94.0137, loss_bbox: 0.1183, loss: 0.2772
+2026-05-07 15:21:19,713 - mmdet - INFO - Epoch [25][100/101]	lr: 1.000e-06, eta: 4:56:05, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0122, loss_rpn_bbox: 0.0035, loss_cls: 0.1365, acc: 94.1791, loss_bbox: 0.1093, loss: 0.2614
+2026-05-07 15:21:54,229 - mmdet - INFO - Epoch [26][50/101]	lr: 1.000e-06, eta: 4:55:44, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0035, loss_cls: 0.1401, acc: 94.0796, loss_bbox: 0.1153, loss: 0.2705
+2026-05-07 15:22:25,185 - mmdet - INFO - Epoch [26][100/101]	lr: 1.000e-06, eta: 4:55:01, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0127, loss_rpn_bbox: 0.0036, loss_cls: 0.1372, acc: 94.1982, loss_bbox: 0.1122, loss: 0.2657
+2026-05-07 15:22:59,654 - mmdet - INFO - Epoch [27][50/101]	lr: 1.000e-06, eta: 4:54:40, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0125, loss_rpn_bbox: 0.0034, loss_cls: 0.1355, acc: 94.3033, loss_bbox: 0.1103, loss: 0.2616
+2026-05-07 15:23:30,679 - mmdet - INFO - Epoch [27][100/101]	lr: 1.000e-06, eta: 4:53:58, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0124, loss_rpn_bbox: 0.0036, loss_cls: 0.1371, acc: 94.1963, loss_bbox: 0.1132, loss: 0.2663
+2026-05-07 15:24:05,164 - mmdet - INFO - Epoch [28][50/101]	lr: 1.000e-06, eta: 4:53:36, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0130, loss_rpn_bbox: 0.0035, loss_cls: 0.1396, acc: 94.0859, loss_bbox: 0.1142, loss: 0.2703
+2026-05-07 15:24:36,154 - mmdet - INFO - Epoch [28][100/101]	lr: 1.000e-06, eta: 4:52:54, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0113, loss_rpn_bbox: 0.0034, loss_cls: 0.1341, acc: 94.3356, loss_bbox: 0.1072, loss: 0.2560
+2026-05-07 15:25:10,646 - mmdet - INFO - Epoch [29][50/101]	lr: 1.000e-06, eta: 4:52:32, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0132, loss_rpn_bbox: 0.0034, loss_cls: 0.1404, acc: 94.0303, loss_bbox: 0.1137, loss: 0.2707
+2026-05-07 15:25:41,654 - mmdet - INFO - Epoch [29][100/101]	lr: 1.000e-06, eta: 4:51:50, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0107, loss_rpn_bbox: 0.0035, loss_cls: 0.1371, acc: 94.1306, loss_bbox: 0.1102, loss: 0.2615
+2026-05-07 15:26:16,099 - mmdet - INFO - Epoch [30][50/101]	lr: 1.000e-06, eta: 4:51:27, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0124, loss_rpn_bbox: 0.0036, loss_cls: 0.1430, acc: 93.9727, loss_bbox: 0.1127, loss: 0.2718
+2026-05-07 15:26:47,107 - mmdet - INFO - Epoch [30][100/101]	lr: 1.000e-06, eta: 4:50:46, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0127, loss_rpn_bbox: 0.0033, loss_cls: 0.1290, acc: 94.4942, loss_bbox: 0.1065, loss: 0.2514
+2026-05-07 15:26:47,914 - mmdet - INFO - Saving checkpoint at 30 epochs
+2026-05-07 15:27:27,970 - mmdet - INFO - Evaluating bbox...
+2026-05-07 15:27:32,468 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.284
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.691
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.169
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.037
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.220
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.360
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.455
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.455
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.455
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.403
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.532
+
+2026-05-07 15:27:32,478 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-07 15:27:32,478 - mmdet - INFO - Epoch(val) [30][371]	bbox_mAP: 0.2840, bbox_mAP_50: 0.6910, bbox_mAP_75: 0.1690, bbox_mAP_s: 0.0370, bbox_mAP_m: 0.2200, bbox_mAP_l: 0.3600, bbox_mAP_copypaste: 0.284 0.691 0.169 0.037 0.220 0.360
+2026-05-07 15:28:06,075 - mmdet - INFO - Epoch [31][50/101]	lr: 1.000e-06, eta: 4:50:22, time: 0.672, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0126, loss_rpn_bbox: 0.0034, loss_cls: 0.1349, acc: 94.2713, loss_bbox: 0.1091, loss: 0.2600
+2026-05-07 15:28:37,048 - mmdet - INFO - Epoch [31][100/101]	lr: 1.000e-06, eta: 4:49:41, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0120, loss_rpn_bbox: 0.0035, loss_cls: 0.1402, acc: 94.0117, loss_bbox: 0.1125, loss: 0.2682
+2026-05-07 15:29:11,552 - mmdet - INFO - Epoch [32][50/101]	lr: 1.000e-06, eta: 4:49:18, time: 0.674, data_time: 0.065, memory: 7277, loss_rpn_cls: 0.0126, loss_rpn_bbox: 0.0036, loss_cls: 0.1348, acc: 94.3418, loss_bbox: 0.1069, loss: 0.2578
+2026-05-07 15:29:42,507 - mmdet - INFO - Epoch [32][100/101]	lr: 1.000e-06, eta: 4:48:37, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0109, loss_rpn_bbox: 0.0033, loss_cls: 0.1316, acc: 94.4959, loss_bbox: 0.1089, loss: 0.2547
+2026-05-07 15:30:17,031 - mmdet - INFO - Epoch [33][50/101]	lr: 1.000e-06, eta: 4:48:13, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0130, loss_rpn_bbox: 0.0036, loss_cls: 0.1346, acc: 94.2598, loss_bbox: 0.1077, loss: 0.2589
+2026-05-07 15:30:47,956 - mmdet - INFO - Epoch [33][100/101]	lr: 1.000e-06, eta: 4:47:32, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0101, loss_rpn_bbox: 0.0030, loss_cls: 0.1321, acc: 94.4229, loss_bbox: 0.1083, loss: 0.2536
+2026-05-07 15:31:22,475 - mmdet - INFO - Epoch [34][50/101]	lr: 1.000e-06, eta: 4:47:08, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0132, loss_rpn_bbox: 0.0039, loss_cls: 0.1408, acc: 94.0450, loss_bbox: 0.1118, loss: 0.2698
+2026-05-07 15:31:53,426 - mmdet - INFO - Epoch [34][100/101]	lr: 1.000e-06, eta: 4:46:28, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0104, loss_rpn_bbox: 0.0028, loss_cls: 0.1309, acc: 94.4116, loss_bbox: 0.1103, loss: 0.2545
+2026-05-07 15:32:27,963 - mmdet - INFO - Epoch [35][50/101]	lr: 1.000e-06, eta: 4:46:04, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0116, loss_rpn_bbox: 0.0034, loss_cls: 0.1377, acc: 94.1601, loss_bbox: 0.1119, loss: 0.2646
+2026-05-07 15:32:58,916 - mmdet - INFO - Epoch [35][100/101]	lr: 1.000e-06, eta: 4:45:24, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0035, loss_cls: 0.1328, acc: 94.3135, loss_bbox: 0.1098, loss: 0.2576
+2026-05-07 15:33:33,432 - mmdet - INFO - Epoch [36][50/101]	lr: 1.000e-06, eta: 4:45:00, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0112, loss_rpn_bbox: 0.0034, loss_cls: 0.1301, acc: 94.5117, loss_bbox: 0.1077, loss: 0.2524
+2026-05-07 15:34:04,499 - mmdet - INFO - Epoch [36][100/101]	lr: 1.000e-06, eta: 4:44:21, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0035, loss_cls: 0.1376, acc: 94.0606, loss_bbox: 0.1136, loss: 0.2664
+2026-05-07 15:34:38,996 - mmdet - INFO - Epoch [37][50/101]	lr: 1.000e-06, eta: 4:43:56, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0125, loss_rpn_bbox: 0.0033, loss_cls: 0.1348, acc: 94.3651, loss_bbox: 0.1089, loss: 0.2594
+2026-05-07 15:35:10,025 - mmdet - INFO - Epoch [37][100/101]	lr: 1.000e-06, eta: 4:43:17, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0120, loss_rpn_bbox: 0.0035, loss_cls: 0.1328, acc: 94.3573, loss_bbox: 0.1090, loss: 0.2574
+2026-05-07 15:35:44,581 - mmdet - INFO - Epoch [38][50/101]	lr: 1.000e-06, eta: 4:42:52, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0134, loss_rpn_bbox: 0.0035, loss_cls: 0.1419, acc: 94.0046, loss_bbox: 0.1158, loss: 0.2747
+2026-05-07 15:36:15,540 - mmdet - INFO - Epoch [38][100/101]	lr: 1.000e-06, eta: 4:42:13, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0095, loss_rpn_bbox: 0.0033, loss_cls: 0.1263, acc: 94.6992, loss_bbox: 0.1006, loss: 0.2398
+2026-05-07 15:36:50,099 - mmdet - INFO - Epoch [39][50/101]	lr: 1.000e-06, eta: 4:41:48, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0118, loss_rpn_bbox: 0.0033, loss_cls: 0.1325, acc: 94.3626, loss_bbox: 0.1071, loss: 0.2547
+2026-05-07 15:37:21,074 - mmdet - INFO - Epoch [39][100/101]	lr: 1.000e-06, eta: 4:41:09, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0123, loss_rpn_bbox: 0.0034, loss_cls: 0.1337, acc: 94.3750, loss_bbox: 0.1069, loss: 0.2562
+2026-05-07 15:37:55,583 - mmdet - INFO - Epoch [40][50/101]	lr: 1.000e-06, eta: 4:40:44, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0106, loss_rpn_bbox: 0.0029, loss_cls: 0.1273, acc: 94.6799, loss_bbox: 0.0999, loss: 0.2407
+2026-05-07 15:38:26,607 - mmdet - INFO - Epoch [40][100/101]	lr: 1.000e-06, eta: 4:40:05, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0115, loss_rpn_bbox: 0.0039, loss_cls: 0.1428, acc: 93.9746, loss_bbox: 0.1183, loss: 0.2766
+2026-05-07 15:38:27,381 - mmdet - INFO - Saving checkpoint at 40 epochs
+2026-05-07 15:39:07,541 - mmdet - INFO - Evaluating bbox...
+2026-05-07 15:39:12,162 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.287
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.689
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.174
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.040
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.224
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.363
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.456
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.456
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.456
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.408
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.529
+
+2026-05-07 15:39:12,171 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-07 15:39:12,172 - mmdet - INFO - Epoch(val) [40][371]	bbox_mAP: 0.2870, bbox_mAP_50: 0.6890, bbox_mAP_75: 0.1740, bbox_mAP_s: 0.0400, bbox_mAP_m: 0.2240, bbox_mAP_l: 0.3630, bbox_mAP_copypaste: 0.287 0.689 0.174 0.040 0.224 0.363
+2026-05-07 15:39:45,765 - mmdet - INFO - Epoch [41][50/101]	lr: 1.000e-06, eta: 4:39:39, time: 0.672, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0104, loss_rpn_bbox: 0.0030, loss_cls: 0.1237, acc: 94.7930, loss_bbox: 0.1012, loss: 0.2383
+2026-05-07 15:40:16,800 - mmdet - INFO - Epoch [41][100/101]	lr: 1.000e-06, eta: 4:39:00, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0150, loss_rpn_bbox: 0.0039, loss_cls: 0.1449, acc: 93.7839, loss_bbox: 0.1189, loss: 0.2828
+2026-05-07 15:40:51,300 - mmdet - INFO - Epoch [42][50/101]	lr: 1.000e-06, eta: 4:38:34, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0111, loss_rpn_bbox: 0.0034, loss_cls: 0.1282, acc: 94.5498, loss_bbox: 0.1064, loss: 0.2491
+2026-05-07 15:41:22,236 - mmdet - INFO - Epoch [42][100/101]	lr: 1.000e-06, eta: 4:37:56, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0032, loss_cls: 0.1325, acc: 94.4328, loss_bbox: 0.1077, loss: 0.2551
+2026-05-07 15:41:56,708 - mmdet - INFO - Epoch [43][50/101]	lr: 1.000e-06, eta: 4:37:29, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0104, loss_rpn_bbox: 0.0037, loss_cls: 0.1302, acc: 94.4307, loss_bbox: 0.1051, loss: 0.2492
+2026-05-07 15:42:27,726 - mmdet - INFO - Epoch [43][100/101]	lr: 1.000e-06, eta: 4:36:52, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0123, loss_rpn_bbox: 0.0031, loss_cls: 0.1336, acc: 94.3327, loss_bbox: 0.1110, loss: 0.2600
+2026-05-07 15:43:02,250 - mmdet - INFO - Epoch [44][50/101]	lr: 1.000e-06, eta: 4:36:25, time: 0.675, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0123, loss_rpn_bbox: 0.0034, loss_cls: 0.1340, acc: 94.3457, loss_bbox: 0.1109, loss: 0.2607
+2026-05-07 15:43:33,228 - mmdet - INFO - Epoch [44][100/101]	lr: 1.000e-06, eta: 4:35:47, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0101, loss_rpn_bbox: 0.0032, loss_cls: 0.1268, acc: 94.6141, loss_bbox: 0.1024, loss: 0.2425
+2026-05-07 15:44:07,742 - mmdet - INFO - Epoch [45][50/101]	lr: 1.000e-06, eta: 4:35:21, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0118, loss_rpn_bbox: 0.0035, loss_cls: 0.1411, acc: 94.0282, loss_bbox: 0.1133, loss: 0.2697
+2026-05-07 15:44:38,705 - mmdet - INFO - Epoch [45][100/101]	lr: 1.000e-06, eta: 4:34:43, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0099, loss_rpn_bbox: 0.0031, loss_cls: 0.1282, acc: 94.5977, loss_bbox: 0.1027, loss: 0.2440
+2026-05-07 15:45:13,285 - mmdet - INFO - Epoch [46][50/101]	lr: 1.000e-06, eta: 4:34:17, time: 0.676, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0121, loss_rpn_bbox: 0.0036, loss_cls: 0.1351, acc: 94.3288, loss_bbox: 0.1081, loss: 0.2589
+2026-05-07 15:45:44,234 - mmdet - INFO - Epoch [46][100/101]	lr: 1.000e-06, eta: 4:33:39, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0097, loss_rpn_bbox: 0.0031, loss_cls: 0.1272, acc: 94.6006, loss_bbox: 0.1015, loss: 0.2415
+2026-05-07 15:46:18,687 - mmdet - INFO - Epoch [47][50/101]	lr: 1.000e-06, eta: 4:33:12, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0131, loss_rpn_bbox: 0.0036, loss_cls: 0.1344, acc: 94.2630, loss_bbox: 0.1078, loss: 0.2589
+2026-05-07 15:46:49,603 - mmdet - INFO - Epoch [47][100/101]	lr: 1.000e-06, eta: 4:32:34, time: 0.618, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0103, loss_rpn_bbox: 0.0032, loss_cls: 0.1308, acc: 94.4521, loss_bbox: 0.1052, loss: 0.2495
+2026-05-07 15:47:24,043 - mmdet - INFO - Epoch [48][50/101]	lr: 1.000e-06, eta: 4:32:07, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0116, loss_rpn_bbox: 0.0034, loss_cls: 0.1311, acc: 94.4609, loss_bbox: 0.1027, loss: 0.2487
+2026-05-07 15:47:54,967 - mmdet - INFO - Epoch [48][100/101]	lr: 1.000e-06, eta: 4:31:29, time: 0.618, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0120, loss_rpn_bbox: 0.0033, loss_cls: 0.1358, acc: 94.1772, loss_bbox: 0.1105, loss: 0.2616
+2026-05-07 15:48:29,469 - mmdet - INFO - Epoch [49][50/101]	lr: 1.000e-06, eta: 4:31:02, time: 0.674, data_time: 0.067, memory: 7277, loss_rpn_cls: 0.0114, loss_rpn_bbox: 0.0035, loss_cls: 0.1313, acc: 94.4766, loss_bbox: 0.1096, loss: 0.2558
+2026-05-07 15:49:00,491 - mmdet - INFO - Epoch [49][100/101]	lr: 1.000e-06, eta: 4:30:25, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0111, loss_rpn_bbox: 0.0032, loss_cls: 0.1320, acc: 94.4065, loss_bbox: 0.1034, loss: 0.2497
+2026-05-07 15:49:34,941 - mmdet - INFO - Epoch [50][50/101]	lr: 1.000e-06, eta: 4:29:57, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0098, loss_rpn_bbox: 0.0031, loss_cls: 0.1322, acc: 94.3965, loss_bbox: 0.1072, loss: 0.2522
+2026-05-07 15:50:05,927 - mmdet - INFO - Epoch [50][100/101]	lr: 1.000e-06, eta: 4:29:20, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0113, loss_rpn_bbox: 0.0034, loss_cls: 0.1297, acc: 94.5274, loss_bbox: 0.1068, loss: 0.2512
+2026-05-07 15:50:06,718 - mmdet - INFO - Saving checkpoint at 50 epochs
+2026-05-07 15:50:46,591 - mmdet - INFO - Evaluating bbox...
+2026-05-07 15:50:51,130 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.291
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.698
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.178
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.037
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.225
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.369
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.459
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.459
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.459
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.405
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.539
+
+2026-05-07 15:50:51,139 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-07 15:50:51,140 - mmdet - INFO - Epoch(val) [50][371]	bbox_mAP: 0.2910, bbox_mAP_50: 0.6980, bbox_mAP_75: 0.1780, bbox_mAP_s: 0.0370, bbox_mAP_m: 0.2250, bbox_mAP_l: 0.3690, bbox_mAP_copypaste: 0.291 0.698 0.178 0.037 0.225 0.369
+2026-05-07 15:51:24,677 - mmdet - INFO - Epoch [51][50/101]	lr: 1.000e-06, eta: 4:28:52, time: 0.670, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0109, loss_rpn_bbox: 0.0031, loss_cls: 0.1211, acc: 94.9131, loss_bbox: 0.0987, loss: 0.2338
+2026-05-07 15:51:55,718 - mmdet - INFO - Epoch [51][100/101]	lr: 1.000e-06, eta: 4:28:15, time: 0.621, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0124, loss_rpn_bbox: 0.0036, loss_cls: 0.1403, acc: 94.0849, loss_bbox: 0.1129, loss: 0.2692
+2026-05-07 15:52:30,177 - mmdet - INFO - Epoch [52][50/101]	lr: 1.000e-06, eta: 4:27:48, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0127, loss_rpn_bbox: 0.0035, loss_cls: 0.1315, acc: 94.4385, loss_bbox: 0.1043, loss: 0.2520
+2026-05-07 15:53:01,128 - mmdet - INFO - Epoch [52][100/101]	lr: 1.000e-06, eta: 4:27:11, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0108, loss_rpn_bbox: 0.0032, loss_cls: 0.1267, acc: 94.5639, loss_bbox: 0.1030, loss: 0.2437
+2026-05-07 15:53:35,572 - mmdet - INFO - Epoch [53][50/101]	lr: 1.000e-06, eta: 4:26:43, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0103, loss_rpn_bbox: 0.0032, loss_cls: 0.1314, acc: 94.4292, loss_bbox: 0.1050, loss: 0.2499
+2026-05-07 15:54:06,530 - mmdet - INFO - Epoch [53][100/101]	lr: 1.000e-06, eta: 4:26:06, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0113, loss_rpn_bbox: 0.0035, loss_cls: 0.1341, acc: 94.2979, loss_bbox: 0.1067, loss: 0.2557
+2026-05-07 15:54:41,030 - mmdet - INFO - Epoch [54][50/101]	lr: 1.000e-06, eta: 4:25:38, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0113, loss_rpn_bbox: 0.0036, loss_cls: 0.1338, acc: 94.3473, loss_bbox: 0.1087, loss: 0.2575
+2026-05-07 15:55:11,986 - mmdet - INFO - Epoch [54][100/101]	lr: 1.000e-06, eta: 4:25:01, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0108, loss_rpn_bbox: 0.0031, loss_cls: 0.1276, acc: 94.5286, loss_bbox: 0.1021, loss: 0.2437
+2026-05-07 15:55:46,421 - mmdet - INFO - Epoch [55][50/101]	lr: 1.000e-06, eta: 4:24:33, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0098, loss_rpn_bbox: 0.0031, loss_cls: 0.1246, acc: 94.6895, loss_bbox: 0.0994, loss: 0.2370
+2026-05-07 15:56:17,437 - mmdet - INFO - Epoch [55][100/101]	lr: 1.000e-06, eta: 4:23:57, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0112, loss_rpn_bbox: 0.0034, loss_cls: 0.1392, acc: 94.0593, loss_bbox: 0.1131, loss: 0.2669
+2026-05-07 15:56:51,950 - mmdet - INFO - Epoch [56][50/101]	lr: 1.000e-06, eta: 4:23:29, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0092, loss_rpn_bbox: 0.0032, loss_cls: 0.1297, acc: 94.5084, loss_bbox: 0.1043, loss: 0.2465
+2026-05-07 15:57:22,971 - mmdet - INFO - Epoch [56][100/101]	lr: 1.000e-06, eta: 4:22:53, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0033, loss_cls: 0.1308, acc: 94.4834, loss_bbox: 0.1047, loss: 0.2505
+2026-05-07 15:57:57,486 - mmdet - INFO - Epoch [57][50/101]	lr: 1.000e-06, eta: 4:22:25, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0126, loss_rpn_bbox: 0.0036, loss_cls: 0.1422, acc: 93.9351, loss_bbox: 0.1119, loss: 0.2703
+2026-05-07 15:58:28,438 - mmdet - INFO - Epoch [57][100/101]	lr: 1.000e-06, eta: 4:21:48, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0095, loss_rpn_bbox: 0.0030, loss_cls: 0.1193, acc: 94.9225, loss_bbox: 0.0978, loss: 0.2295
+2026-05-07 15:59:02,926 - mmdet - INFO - Epoch [58][50/101]	lr: 1.000e-06, eta: 4:21:20, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0103, loss_rpn_bbox: 0.0032, loss_cls: 0.1309, acc: 94.4722, loss_bbox: 0.1066, loss: 0.2511
+2026-05-07 15:59:33,892 - mmdet - INFO - Epoch [58][100/101]	lr: 1.000e-06, eta: 4:20:43, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0031, loss_cls: 0.1263, acc: 94.6660, loss_bbox: 0.1020, loss: 0.2431
+2026-05-07 16:00:08,346 - mmdet - INFO - Epoch [59][50/101]	lr: 1.000e-06, eta: 4:20:15, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0100, loss_rpn_bbox: 0.0031, loss_cls: 0.1225, acc: 94.8010, loss_bbox: 0.1004, loss: 0.2361
+2026-05-07 16:00:39,434 - mmdet - INFO - Epoch [59][100/101]	lr: 1.000e-06, eta: 4:19:39, time: 0.622, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0111, loss_rpn_bbox: 0.0034, loss_cls: 0.1337, acc: 94.2861, loss_bbox: 0.1075, loss: 0.2557
+2026-05-07 16:01:13,940 - mmdet - INFO - Epoch [60][50/101]	lr: 1.000e-06, eta: 4:19:11, time: 0.674, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0120, loss_rpn_bbox: 0.0035, loss_cls: 0.1415, acc: 93.9211, loss_bbox: 0.1143, loss: 0.2714
+2026-05-07 16:01:44,905 - mmdet - INFO - Epoch [60][100/101]	lr: 1.000e-06, eta: 4:18:35, time: 0.619, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0096, loss_rpn_bbox: 0.0031, loss_cls: 0.1194, acc: 94.8616, loss_bbox: 0.0929, loss: 0.2250
+2026-05-07 16:01:45,677 - mmdet - INFO - Saving checkpoint at 60 epochs
+2026-05-07 16:02:25,701 - mmdet - INFO - Evaluating bbox...
+2026-05-07 16:02:30,223 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.291
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.693
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.178
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.225
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.368
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.458
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.458
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.458
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.407
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.535
+
+2026-05-07 16:02:30,232 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-07 16:02:30,232 - mmdet - INFO - Epoch(val) [60][371]	bbox_mAP: 0.2910, bbox_mAP_50: 0.6930, bbox_mAP_75: 0.1780, bbox_mAP_s: 0.0420, bbox_mAP_m: 0.2250, bbox_mAP_l: 0.3680, bbox_mAP_copypaste: 0.291 0.693 0.178 0.042 0.225 0.368
+2026-05-07 16:03:03,872 - mmdet - INFO - Epoch [61][50/101]	lr: 1.000e-06, eta: 4:18:06, time: 0.673, data_time: 0.066, memory: 7277, loss_rpn_cls: 0.0121, loss_rpn_bbox: 0.0031, loss_cls: 0.1258, acc: 94.7559, loss_bbox: 0.0983, loss: 0.2392
+2026-05-07 16:03:34,891 - mmdet - INFO - Epoch [61][100/101]	lr: 1.000e-06, eta: 4:17:30, time: 0.620, data_time: 0.013, memory: 7277, loss_rpn_cls: 0.0102, loss_rpn_bbox: 0.0033, loss_cls: 0.1339, acc: 94.2949, loss_bbox: 0.1088, loss: 0.2562

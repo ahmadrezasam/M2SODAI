@@ -1,0 +1,7 @@
+path: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/hsi_rgb_640_v3_bilinear_obb
+train: images/train
+val: images/val
+test: images/val # Using val as test for training convenience
+
+nc: 1
+names: ["ship"]

@@ -102,7 +102,12 @@ def swin_converter(ckpt):
     for k, v in ckpt.items():
         if k.startswith('head'):
             continue
-        elif k.startswith('layers'):
+        
+        # Remove backbone. prefix if present before processing
+        if k.startswith('backbone.'):
+            k = k[9:]
+            
+        if k.startswith('layers'):
             new_v = v
             if 'attn.' in k:
                 new_k = k.replace('attn.', 'attn.w_msa.')

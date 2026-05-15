@@ -1,0 +1,1881 @@
+2026-05-07 05:46:51,978 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.16 (default, Jan 17 2023, 22:20:44) [GCC 11.2.0]
+CUDA available: True
+GPU 0: NVIDIA GeForce RTX 2080 Ti
+CUDA_HOME: /usr
+NVCC: Build cuda_11.5.r11.5/compiler.30672275_0
+GCC: gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+PyTorch: 1.7.1+cu110
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.6.0 (Git Hash 5ef631a030a6f73131c77892041042805a06064f)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.0
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.8.2+cu110
+OpenCV: 4.13.0
+MMCV: 1.3.17
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.0
+MMDetection: 2.23.0+2544401
+------------------------------------------------------------
+
+2026-05-07 05:46:53,208 - mmdet - INFO - Distributed training: True
+2026-05-07 05:46:54,486 - mmdet - INFO - Config:
+norm_cfg = dict(type='GN', num_groups=32, requires_grad=True)
+model = dict(
+    type='FasterRCNN',
+    backbone=dict(
+        type='ViTAE_Window_NoShift_basic',
+        RC_tokens_type=['swin', 'swin', 'transformer', 'transformer'],
+        NC_tokens_type=['swin', 'swin', 'transformer', 'transformer'],
+        stages=4,
+        embed_dims=[64, 128, 256, 512],
+        token_dims=[64, 128, 256, 512],
+        downsample_ratios=[4, 2, 2, 2],
+        NC_depth=[2, 2, 8, 2],
+        NC_heads=[1, 2, 4, 8],
+        RC_heads=[1, 1, 2, 4],
+        mlp_ratio=4.0,
+        NC_group=[1, 32, 64, 128],
+        RC_group=[1, 16, 32, 64],
+        img_size=640,
+        window_size=7,
+        drop_path_rate=0.3,
+        frozen_stages=1,
+        norm_eval=True),
+    neck=dict(
+        type='FPN',
+        in_channels=[64, 128, 256, 512],
+        out_channels=256,
+        num_outs=5,
+        norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0)),
+    roi_head=dict(
+        type='StandardRoIHead',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='Shared4Conv1FCBBoxHead',
+            conv_out_channels=256,
+            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=1,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0.0, 0.0, 0.0, 0.0],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            reg_class_agnostic=False,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=False,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            pos_weight=-1,
+            debug=False)),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.9),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.01,
+            nms=dict(type='soft_nms', iou_threshold=0.5, min_score=0.01),
+            max_per_img=100)),
+    pretrained='orcn-vitaev2-s-dota-latest.pth')
+dataset_type = 'CocoDataset'
+data_root = '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
+    dict(
+        type='RandomFlip',
+        flip_ratio=0.5,
+        direction=['horizontal', 'vertical']),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(640, 640),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=8,
+    train=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/train/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/train/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
+            dict(
+                type='RandomFlip',
+                flip_ratio=0.5,
+                direction=['horizontal', 'vertical']),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ]),
+    val=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(640, 640),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(640, 640),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+optimizer = dict(
+    type='AdamW',
+    lr=0.0001,
+    betas=(0.9, 0.999),
+    weight_decay=0.05,
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            absolute_pos_embed=dict(decay_mult=0.0),
+            relative_position_bias_table=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0))))
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[210, 270])
+evaluation = dict(interval=10, metric='bbox')
+checkpoint_config = dict(interval=1)
+runner = dict(type='EpochBasedRunner', max_epochs=1)
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+seed = 0
+deterministic = True
+work_dir = '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_vitae_hbb/vitae_s_hbb_fold_1'
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2026-05-07 05:46:54,486 - mmdet - INFO - Set random seed to 42, deterministic: False
+2026-05-07 05:46:55,288 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2026-05-07 05:46:55,313 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2026-05-07 05:46:55,323 - mmdet - INFO - initialize Shared4Conv1FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+Name of parameter - Initialization information
+
+backbone.RC_layers.0.norm1.weight - torch.Size([3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.norm1.bias - torch.Size([3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.attn.kqv.weight - torch.Size([192, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.attn.kqv.bias - torch.Size([192]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.attn.proj.weight - torch.Size([64, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.attn.proj.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.attn.norm1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.attn.norm1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.norm2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.norm2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.mlp.fc1.weight - torch.Size([256, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.mlp.fc1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.mlp.fc2.weight - torch.Size([64, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.mlp.fc2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.0.weight - torch.Size([64, 3, 7, 7]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.0.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.3.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.3.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.4.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.4.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.6.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PCM.6.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.0.weight - torch.Size([64, 3, 7, 7]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.0.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.3.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.3.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.4.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.4.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.6.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.PRM.6.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.proj.weight - torch.Size([64, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.0.proj.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.norm1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.norm1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.attn.kqv.weight - torch.Size([384, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.attn.kqv.bias - torch.Size([384]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.attn.proj.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.attn.proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.attn.norm1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.attn.norm1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.norm2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.norm2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.mlp.fc1.weight - torch.Size([512, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.mlp.fc1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.mlp.fc2.weight - torch.Size([128, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.mlp.fc2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.0.weight - torch.Size([128, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.3.weight - torch.Size([128, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.6.weight - torch.Size([128, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PCM.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.0.weight - torch.Size([128, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.0.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.3.weight - torch.Size([128, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.6.weight - torch.Size([128, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.PRM.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.proj.weight - torch.Size([128, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.1.proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.norm1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.norm1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.attn.in_proj_weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.attn.in_proj_bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.attn.out_proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.attn.out_proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.0.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.0.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.3.weight - torch.Size([256, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.6.weight - torch.Size([256, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.0.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.0.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.3.weight - torch.Size([256, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.6.weight - torch.Size([256, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.PRM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.proj.weight - torch.Size([256, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.2.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.attn.in_proj_weight - torch.Size([1536, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.attn.in_proj_bias - torch.Size([1536]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.attn.out_proj.weight - torch.Size([512, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.attn.out_proj.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.norm2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.norm2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.mlp.fc1.weight - torch.Size([2048, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.mlp.fc1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.mlp.fc2.weight - torch.Size([512, 2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.mlp.fc2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.0.weight - torch.Size([512, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.3.weight - torch.Size([512, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.4.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.4.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.6.weight - torch.Size([512, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PCM.6.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.0.weight - torch.Size([512, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.3.weight - torch.Size([512, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.4.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.4.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.6.weight - torch.Size([512, 8, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.PRM.6.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.proj.weight - torch.Size([512, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.RC_layers.3.proj.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.norm1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.norm1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.attn.qkv.weight - torch.Size([192, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.attn.qkv.bias - torch.Size([192]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.attn.proj.weight - torch.Size([64, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.attn.proj.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.norm2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.norm2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.mlp.fc1.weight - torch.Size([256, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.mlp.fc1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.mlp.fc2.weight - torch.Size([64, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.mlp.fc2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.0.weight - torch.Size([256, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.0.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.3.weight - torch.Size([64, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.3.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.4.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.4.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.6.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.0.PCM.6.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.norm1.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.norm1.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.attn.qkv.weight - torch.Size([192, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.attn.qkv.bias - torch.Size([192]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.attn.proj.weight - torch.Size([64, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.attn.proj.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.norm2.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.norm2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.mlp.fc1.weight - torch.Size([256, 64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.mlp.fc1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.mlp.fc2.weight - torch.Size([64, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.mlp.fc2.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.0.weight - torch.Size([256, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.0.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.3.weight - torch.Size([64, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.3.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.4.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.4.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.6.weight - torch.Size([64, 64, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.0.1.PCM.6.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.norm1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.norm1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.attn.qkv.weight - torch.Size([384, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.attn.qkv.bias - torch.Size([384]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.attn.proj.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.attn.proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.norm2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.norm2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.mlp.fc1.weight - torch.Size([512, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.mlp.fc1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.mlp.fc2.weight - torch.Size([128, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.mlp.fc2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.0.weight - torch.Size([512, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.3.weight - torch.Size([128, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.6.weight - torch.Size([128, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.0.PCM.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.norm1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.norm1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.attn.qkv.weight - torch.Size([384, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.attn.qkv.bias - torch.Size([384]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.attn.proj.weight - torch.Size([128, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.attn.proj.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.norm2.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.norm2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.mlp.fc1.weight - torch.Size([512, 128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.mlp.fc1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.mlp.fc2.weight - torch.Size([128, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.mlp.fc2.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.0.weight - torch.Size([512, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.0.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.3.weight - torch.Size([128, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.3.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.4.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.4.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.6.weight - torch.Size([128, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.1.1.PCM.6.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.0.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.1.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.2.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.3.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.4.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.5.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.6.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.norm1.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.norm1.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.attn.qkv.weight - torch.Size([768, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.attn.qkv.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.attn.proj.weight - torch.Size([256, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.attn.proj.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.norm2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.norm2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.mlp.fc1.weight - torch.Size([1024, 256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.mlp.fc1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.mlp.fc2.weight - torch.Size([256, 1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.mlp.fc2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.0.weight - torch.Size([1024, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.0.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.1.weight - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.1.bias - torch.Size([1024]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.3.weight - torch.Size([256, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.3.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.4.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.4.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.6.weight - torch.Size([256, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.2.7.PCM.6.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.norm1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.norm1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.attn.qkv.weight - torch.Size([1536, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.attn.qkv.bias - torch.Size([1536]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.attn.proj.weight - torch.Size([512, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.attn.proj.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.norm2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.norm2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.mlp.fc1.weight - torch.Size([2048, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.mlp.fc1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.mlp.fc2.weight - torch.Size([512, 2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.mlp.fc2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.0.weight - torch.Size([2048, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.0.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.1.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.3.weight - torch.Size([512, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.4.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.4.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.6.weight - torch.Size([512, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.0.PCM.6.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.norm1.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.norm1.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.attn.qkv.weight - torch.Size([1536, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.attn.qkv.bias - torch.Size([1536]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.attn.proj.weight - torch.Size([512, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.attn.proj.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.norm2.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.norm2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.mlp.fc1.weight - torch.Size([2048, 512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.mlp.fc1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.mlp.fc2.weight - torch.Size([512, 2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.mlp.fc2.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.0.weight - torch.Size([2048, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.0.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.1.weight - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.1.bias - torch.Size([2048]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.3.weight - torch.Size([512, 16, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.4.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.4.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.6.weight - torch.Size([512, 4, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.NC_layers.3.1.PCM.6.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.0.weight - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.0.bias - torch.Size([64]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.1.weight - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.1.bias - torch.Size([128]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.2.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.2.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.3.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+backbone.out_layers.3.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.0.conv.weight - torch.Size([256, 64, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.0.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.0.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.1.conv.weight - torch.Size([256, 128, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.1.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.1.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.2.conv.weight - torch.Size([256, 256, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.2.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.2.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.3.conv.weight - torch.Size([256, 512, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.3.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.3.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.0.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.0.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.1.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.1.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.2.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.2.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.3.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.3.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+rpn_head.rpn_conv.weight - torch.Size([256, 256, 3, 3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_conv.bias - torch.Size([256]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.weight - torch.Size([3, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.bias - torch.Size([3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.weight - torch.Size([12, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.bias - torch.Size([12]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_cls.weight - torch.Size([2, 1024]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_cls.bias - torch.Size([2]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_reg.weight - torch.Size([4, 1024]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.fc_reg.bias - torch.Size([4]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.shared_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.0.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.0.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_fcs.0.weight - torch.Size([1024, 12544]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.shared_fcs.0.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+2026-05-07 05:46:56,299 - mmdet - INFO - Start running, host: ahmadreza@quartz, work_dir: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_vitae_hbb/vitae_s_hbb_fold_1
+2026-05-07 05:46:56,300 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+2026-05-07 05:46:56,300 - mmdet - INFO - workflow: [('train', 1)], max: 1 epochs
+2026-05-07 05:46:56,300 - mmdet - INFO - Checkpoints will be saved to /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_vitae_hbb/vitae_s_hbb_fold_1 by HardDiskBackend.
+2026-05-07 05:47:28,577 - mmdet - INFO - Epoch [1][50/201]	lr: 9.890e-06, eta: 0:01:37, time: 0.644, data_time: 0.064, memory: 6530, loss_rpn_cls: 0.6675, loss_rpn_bbox: 0.0105, loss_cls: 0.2322, acc: 97.5488, loss_bbox: 0.0253, loss: 0.9355

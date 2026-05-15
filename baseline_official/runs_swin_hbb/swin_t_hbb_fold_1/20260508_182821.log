@@ -1,0 +1,1706 @@
+2026-05-08 18:28:21,608 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.16 (default, Jan 17 2023, 22:20:44) [GCC 11.2.0]
+CUDA available: True
+GPU 0: NVIDIA GeForce RTX 2080 Ti
+CUDA_HOME: /usr
+NVCC: Build cuda_11.5.r11.5/compiler.30672275_0
+GCC: gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+PyTorch: 1.7.1+cu110
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.6.0 (Git Hash 5ef631a030a6f73131c77892041042805a06064f)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.0
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.8.2+cu110
+OpenCV: 4.13.0
+MMCV: 1.3.17
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.0
+MMDetection: 2.23.0+2544401
+------------------------------------------------------------
+
+2026-05-08 18:28:22,778 - mmdet - INFO - Distributed training: True
+2026-05-08 18:28:23,917 - mmdet - INFO - Config:
+norm_cfg = dict(type='GN', num_groups=32, requires_grad=True)
+model = dict(
+    type='FasterRCNN',
+    backbone=dict(
+        type='SwinTransformer',
+        embed_dims=96,
+        depths=[2, 2, 6, 2],
+        num_heads=[3, 6, 12, 24],
+        window_size=7,
+        mlp_ratio=4,
+        qkv_bias=True,
+        qk_scale=None,
+        drop_rate=0.0,
+        attn_drop_rate=0.0,
+        drop_path_rate=0.2,
+        patch_norm=True,
+        out_indices=(0, 1, 2, 3),
+        with_cp=False,
+        convert_weights=True,
+        init_cfg=dict(
+            type='Pretrained', checkpoint='orcn-swin-t-dota-latest.pth')),
+    neck=dict(
+        type='FPN',
+        in_channels=[96, 192, 384, 768],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[4, 8, 16],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0)),
+    roi_head=dict(
+        type='StandardRoIHead',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='Shared4Conv1FCBBoxHead',
+            conv_out_channels=256,
+            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=1,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0.0, 0.0, 0.0, 0.0],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            reg_class_agnostic=False,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=False,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            pos_weight=-1,
+            debug=False)),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.9),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.01,
+            nms=dict(type='soft_nms', iou_threshold=0.5, min_score=0.01),
+            max_per_img=100)))
+dataset_type = 'CocoDataset'
+classes = ('ship', )
+data_root = '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(640, 640),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=4,
+    workers_per_gpu=4,
+    train=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/train/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/train/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
+            dict(type='RandomFlip', flip_ratio=0.5),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ]),
+    val=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(640, 640),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CocoDataset',
+        ann_file=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/annotations.json',
+        img_prefix=
+        '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_1/val/images/',
+        classes=('ship', ),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(640, 640),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.05)
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[200, 250])
+runner = dict(type='EpochBasedRunner', max_epochs=300)
+evaluation = dict(interval=5, metric='bbox', save_best='bbox_mAP')
+checkpoint_config = dict(interval=10, max_keep_ckpts=3)
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+custom_hooks = [
+    dict(
+        type='EarlyStoppingHook',
+        monitor='bbox_mAP',
+        patience=5,
+        min_delta=0.001)
+]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+work_dir = '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1'
+seed = 0
+deterministic = True
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2026-05-08 18:28:23,918 - mmdet - INFO - Set random seed to 42, deterministic: False
+2026-05-08 18:28:24,540 - mmdet - INFO - load checkpoint from local path: orcn-swin-t-dota-latest.pth
+2026-05-08 18:28:25,197 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2026-05-08 18:28:25,221 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2026-05-08 18:28:25,231 - mmdet - INFO - initialize Shared4Conv1FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+Name of parameter - Initialization information
+
+backbone.patch_embed.projection.weight - torch.Size([96, 3, 4, 4]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.projection.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.norm.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.norm.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm1.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 3]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.qkv.weight - torch.Size([288, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.qkv.bias - torch.Size([288]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.proj.weight - torch.Size([96, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.proj.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm2.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm2.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.0.0.weight - torch.Size([384, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.0.0.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.1.weight - torch.Size([96, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm1.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 3]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.qkv.weight - torch.Size([288, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.qkv.bias - torch.Size([288]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.proj.weight - torch.Size([96, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.proj.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm2.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm2.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.0.0.weight - torch.Size([384, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.0.0.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.1.weight - torch.Size([96, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.norm.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.norm.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.reduction.weight - torch.Size([192, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 6]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.qkv.weight - torch.Size([576, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.qkv.bias - torch.Size([576]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.proj.weight - torch.Size([192, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.proj.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm2.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm2.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.0.0.weight - torch.Size([768, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.0.0.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.1.weight - torch.Size([192, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 6]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.qkv.weight - torch.Size([576, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.qkv.bias - torch.Size([576]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.proj.weight - torch.Size([192, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.proj.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm2.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm2.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.0.0.weight - torch.Size([768, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.0.0.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.1.weight - torch.Size([192, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.norm.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.norm.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.reduction.weight - torch.Size([384, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.norm.weight - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.norm.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.reduction.weight - torch.Size([768, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm1.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 24]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.qkv.weight - torch.Size([2304, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.qkv.bias - torch.Size([2304]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.proj.weight - torch.Size([768, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.proj.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm2.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm2.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm1.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 24]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.qkv.weight - torch.Size([2304, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.qkv.bias - torch.Size([2304]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.proj.weight - torch.Size([768, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.proj.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm2.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm2.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm0.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm0.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm3.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm3.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+neck.lateral_convs.0.conv.weight - torch.Size([256, 96, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.0.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.1.conv.weight - torch.Size([256, 192, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.1.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.2.conv.weight - torch.Size([256, 384, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.2.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.lateral_convs.3.conv.weight - torch.Size([256, 768, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.3.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.0.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.1.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.2.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+neck.fpn_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.3.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+rpn_head.rpn_conv.weight - torch.Size([256, 256, 3, 3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_conv.bias - torch.Size([256]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.weight - torch.Size([9, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.bias - torch.Size([9]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.weight - torch.Size([36, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.bias - torch.Size([36]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_cls.weight - torch.Size([2, 1024]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_cls.bias - torch.Size([2]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.fc_reg.weight - torch.Size([4, 1024]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.fc_reg.bias - torch.Size([4]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.shared_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.0.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.0.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.1.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.2.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.gn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_convs.3.gn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of FasterRCNN  
+
+roi_head.bbox_head.shared_fcs.0.weight - torch.Size([1024, 12544]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.shared_fcs.0.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+2026-05-08 18:28:25,733 - mmdet - INFO - Start running, host: ahmadreza@quartz, work_dir: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1
+2026-05-08 18:28:25,734 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(NORMAL      ) EarlyStoppingHook                  
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+2026-05-08 18:28:25,734 - mmdet - INFO - workflow: [('train', 1)], max: 300 epochs
+2026-05-08 18:28:25,734 - mmdet - INFO - Checkpoints will be saved to /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1 by HardDiskBackend.
+2026-05-08 18:29:00,017 - mmdet - INFO - Epoch [1][50/101]	lr: 9.890e-06, eta: 5:44:52, time: 0.684, data_time: 0.065, memory: 7332, loss_rpn_cls: 0.6894, loss_rpn_bbox: 0.0164, loss_cls: 0.3401, acc: 81.8848, loss_bbox: 0.0353, loss: 1.0812
+2026-05-08 18:29:32,080 - mmdet - INFO - Epoch [1][100/101]	lr: 1.988e-05, eta: 5:33:32, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.4704, loss_rpn_bbox: 0.0161, loss_cls: 0.2055, acc: 93.4502, loss_bbox: 0.1372, loss: 0.8292
+2026-05-08 18:30:07,409 - mmdet - INFO - Epoch [2][50/101]	lr: 3.007e-05, eta: 5:35:25, time: 0.691, data_time: 0.065, memory: 7332, loss_rpn_cls: 0.1367, loss_rpn_bbox: 0.0138, loss_cls: 0.2540, acc: 90.6104, loss_bbox: 0.2156, loss: 0.6202
+2026-05-08 18:30:39,378 - mmdet - INFO - Epoch [2][100/101]	lr: 4.006e-05, eta: 5:31:21, time: 0.639, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0963, loss_rpn_bbox: 0.0149, loss_cls: 0.2867, acc: 88.6543, loss_bbox: 0.2461, loss: 0.6440
+2026-05-08 18:31:14,987 - mmdet - INFO - Epoch [3][50/101]	lr: 5.025e-05, eta: 5:32:59, time: 0.696, data_time: 0.065, memory: 7332, loss_rpn_cls: 0.0648, loss_rpn_bbox: 0.0120, loss_cls: 0.2617, acc: 89.4277, loss_bbox: 0.2190, loss: 0.5574
+2026-05-08 18:31:47,106 - mmdet - INFO - Epoch [3][100/101]	lr: 6.024e-05, eta: 5:30:34, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0576, loss_rpn_bbox: 0.0128, loss_cls: 0.2817, acc: 88.0615, loss_bbox: 0.2415, loss: 0.5935
+2026-05-08 18:32:22,835 - mmdet - INFO - Epoch [4][50/101]	lr: 7.043e-05, eta: 5:31:42, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0504, loss_rpn_bbox: 0.0112, loss_cls: 0.2830, acc: 87.7002, loss_bbox: 0.2403, loss: 0.5848
+2026-05-08 18:32:54,939 - mmdet - INFO - Epoch [4][100/101]	lr: 8.042e-05, eta: 5:29:45, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0503, loss_rpn_bbox: 0.0105, loss_cls: 0.2827, acc: 87.8340, loss_bbox: 0.2373, loss: 0.5806
+2026-05-08 18:33:30,702 - mmdet - INFO - Epoch [5][50/101]	lr: 9.061e-05, eta: 5:30:30, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0443, loss_rpn_bbox: 0.0108, loss_cls: 0.2644, acc: 88.4648, loss_bbox: 0.2207, loss: 0.5403
+2026-05-08 18:34:02,924 - mmdet - INFO - Epoch [5][100/101]	lr: 1.000e-04, eta: 5:28:58, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0456, loss_rpn_bbox: 0.0095, loss_cls: 0.2806, acc: 87.7891, loss_bbox: 0.2339, loss: 0.5695
+2026-05-08 18:34:41,618 - mmdet - INFO - Evaluating bbox...
+2026-05-08 18:34:46,553 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.194
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.530
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.009
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.149
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.254
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.376
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.376
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.376
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.309
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.468
+
+2026-05-08 18:34:48,806 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_5.pth.
+2026-05-08 18:34:48,806 - mmdet - INFO - Best bbox_mAP is 0.1940 at 5 epoch.
+2026-05-08 18:34:48,806 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 18:34:48,806 - mmdet - INFO - Epoch(val) [5][371]	bbox_mAP: 0.1940, bbox_mAP_50: 0.5300, bbox_mAP_75: 0.0800, bbox_mAP_s: 0.0090, bbox_mAP_m: 0.1490, bbox_mAP_l: 0.2540, bbox_mAP_copypaste: 0.194 0.530 0.080 0.009 0.149 0.254
+2026-05-08 18:35:23,774 - mmdet - INFO - Epoch [6][50/101]	lr: 1.000e-04, eta: 5:29:27, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0328, loss_rpn_bbox: 0.0095, loss_cls: 0.2696, acc: 88.2971, loss_bbox: 0.2209, loss: 0.5328
+2026-05-08 18:35:55,854 - mmdet - INFO - Epoch [6][100/101]	lr: 1.000e-04, eta: 5:27:57, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0297, loss_rpn_bbox: 0.0083, loss_cls: 0.2519, acc: 88.8936, loss_bbox: 0.2077, loss: 0.4977
+2026-05-08 18:36:31,563 - mmdet - INFO - Epoch [7][50/101]	lr: 1.000e-04, eta: 5:28:14, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0302, loss_rpn_bbox: 0.0094, loss_cls: 0.2414, acc: 89.4202, loss_bbox: 0.1982, loss: 0.4791
+2026-05-08 18:37:03,735 - mmdet - INFO - Epoch [7][100/101]	lr: 1.000e-04, eta: 5:26:56, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0278, loss_rpn_bbox: 0.0092, loss_cls: 0.2504, acc: 89.0391, loss_bbox: 0.1977, loss: 0.4851
+2026-05-08 18:37:39,460 - mmdet - INFO - Epoch [8][50/101]	lr: 1.000e-04, eta: 5:27:05, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0219, loss_rpn_bbox: 0.0076, loss_cls: 0.2113, acc: 90.8496, loss_bbox: 0.1624, loss: 0.4032
+2026-05-08 18:38:11,881 - mmdet - INFO - Epoch [8][100/101]	lr: 1.000e-04, eta: 5:26:03, time: 0.648, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0252, loss_rpn_bbox: 0.0084, loss_cls: 0.2533, acc: 88.8093, loss_bbox: 0.2011, loss: 0.4880
+2026-05-08 18:38:47,491 - mmdet - INFO - Epoch [9][50/101]	lr: 1.000e-04, eta: 5:26:02, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0185, loss_rpn_bbox: 0.0079, loss_cls: 0.2130, acc: 90.8013, loss_bbox: 0.1682, loss: 0.4076
+2026-05-08 18:39:19,775 - mmdet - INFO - Epoch [9][100/101]	lr: 1.000e-04, eta: 5:24:59, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0218, loss_rpn_bbox: 0.0075, loss_cls: 0.2212, acc: 90.3013, loss_bbox: 0.1600, loss: 0.4105
+2026-05-08 18:39:55,589 - mmdet - INFO - Epoch [10][50/101]	lr: 1.000e-04, eta: 5:25:01, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0194, loss_rpn_bbox: 0.0070, loss_cls: 0.2120, acc: 90.8785, loss_bbox: 0.1586, loss: 0.3970
+2026-05-08 18:40:27,740 - mmdet - INFO - Epoch [10][100/101]	lr: 1.000e-04, eta: 5:23:56, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0156, loss_rpn_bbox: 0.0068, loss_cls: 0.1923, acc: 91.6514, loss_bbox: 0.1476, loss: 0.3622
+2026-05-08 18:40:28,548 - mmdet - INFO - Saving checkpoint at 10 epochs
+2026-05-08 18:41:08,759 - mmdet - INFO - Evaluating bbox...
+2026-05-08 18:41:13,191 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.241
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.608
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.129
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.010
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.187
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.311
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.418
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.418
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.418
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.360
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.501
+
+2026-05-08 18:41:13,396 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_5.pth was removed
+2026-05-08 18:41:15,611 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_10.pth.
+2026-05-08 18:41:15,611 - mmdet - INFO - Best bbox_mAP is 0.2410 at 10 epoch.
+2026-05-08 18:41:15,611 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 18:41:15,612 - mmdet - INFO - Epoch(val) [10][371]	bbox_mAP: 0.2410, bbox_mAP_50: 0.6080, bbox_mAP_75: 0.1290, bbox_mAP_s: 0.0100, bbox_mAP_m: 0.1870, bbox_mAP_l: 0.3110, bbox_mAP_copypaste: 0.241 0.608 0.129 0.010 0.187 0.311
+2026-05-08 18:41:50,362 - mmdet - INFO - Epoch [11][50/101]	lr: 1.000e-04, eta: 5:23:47, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0140, loss_rpn_bbox: 0.0072, loss_cls: 0.2011, acc: 91.1924, loss_bbox: 0.1492, loss: 0.3715
+2026-05-08 18:42:22,587 - mmdet - INFO - Epoch [11][100/101]	lr: 1.000e-04, eta: 5:22:48, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0155, loss_rpn_bbox: 0.0075, loss_cls: 0.1896, acc: 91.7678, loss_bbox: 0.1370, loss: 0.3496
+2026-05-08 18:42:58,340 - mmdet - INFO - Epoch [12][50/101]	lr: 1.000e-04, eta: 5:22:41, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0159, loss_rpn_bbox: 0.0066, loss_cls: 0.1995, acc: 91.2924, loss_bbox: 0.1436, loss: 0.3658
+2026-05-08 18:43:30,491 - mmdet - INFO - Epoch [12][100/101]	lr: 1.000e-04, eta: 5:21:42, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0147, loss_rpn_bbox: 0.0061, loss_cls: 0.1841, acc: 91.9602, loss_bbox: 0.1295, loss: 0.3343
+2026-05-08 18:44:06,292 - mmdet - INFO - Epoch [13][50/101]	lr: 1.000e-04, eta: 5:21:35, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0135, loss_rpn_bbox: 0.0061, loss_cls: 0.1835, acc: 92.0412, loss_bbox: 0.1318, loss: 0.3348
+2026-05-08 18:44:38,557 - mmdet - INFO - Epoch [13][100/101]	lr: 1.000e-04, eta: 5:20:40, time: 0.645, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0125, loss_rpn_bbox: 0.0061, loss_cls: 0.1800, acc: 92.1725, loss_bbox: 0.1254, loss: 0.3240
+2026-05-08 18:45:14,292 - mmdet - INFO - Epoch [14][50/101]	lr: 1.000e-04, eta: 5:20:29, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0104, loss_rpn_bbox: 0.0055, loss_cls: 0.1647, acc: 92.8697, loss_bbox: 0.1112, loss: 0.2918
+2026-05-08 18:45:46,497 - mmdet - INFO - Epoch [14][100/101]	lr: 1.000e-04, eta: 5:19:35, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0110, loss_rpn_bbox: 0.0071, loss_cls: 0.1786, acc: 92.2741, loss_bbox: 0.1228, loss: 0.3195
+2026-05-08 18:46:22,228 - mmdet - INFO - Epoch [15][50/101]	lr: 1.000e-04, eta: 5:19:22, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0086, loss_rpn_bbox: 0.0054, loss_cls: 0.1533, acc: 93.3966, loss_bbox: 0.1033, loss: 0.2706
+2026-05-08 18:46:54,463 - mmdet - INFO - Epoch [15][100/101]	lr: 1.000e-04, eta: 5:18:30, time: 0.645, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0120, loss_rpn_bbox: 0.0053, loss_cls: 0.1731, acc: 92.4869, loss_bbox: 0.1187, loss: 0.3091
+2026-05-08 18:47:33,295 - mmdet - INFO - Evaluating bbox...
+2026-05-08 18:47:36,952 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.253
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.637
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.140
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.020
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.205
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.318
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.354
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.511
+
+2026-05-08 18:47:37,155 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_10.pth was removed
+2026-05-08 18:47:39,359 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_15.pth.
+2026-05-08 18:47:39,359 - mmdet - INFO - Best bbox_mAP is 0.2530 at 15 epoch.
+2026-05-08 18:47:39,359 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 18:47:39,359 - mmdet - INFO - Epoch(val) [15][371]	bbox_mAP: 0.2530, bbox_mAP_50: 0.6370, bbox_mAP_75: 0.1400, bbox_mAP_s: 0.0200, bbox_mAP_m: 0.2050, bbox_mAP_l: 0.3180, bbox_mAP_copypaste: 0.253 0.637 0.140 0.020 0.205 0.318
+2026-05-08 18:48:14,243 - mmdet - INFO - Epoch [16][50/101]	lr: 1.000e-04, eta: 5:18:15, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0116, loss_rpn_bbox: 0.0050, loss_cls: 0.1636, acc: 92.9879, loss_bbox: 0.1085, loss: 0.2887
+2026-05-08 18:48:46,266 - mmdet - INFO - Epoch [16][100/101]	lr: 1.000e-04, eta: 5:17:20, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0108, loss_rpn_bbox: 0.0054, loss_cls: 0.1563, acc: 93.3020, loss_bbox: 0.1032, loss: 0.2757
+2026-05-08 18:49:22,005 - mmdet - INFO - Epoch [17][50/101]	lr: 1.000e-04, eta: 5:17:05, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0110, loss_rpn_bbox: 0.0053, loss_cls: 0.1611, acc: 93.1131, loss_bbox: 0.1027, loss: 0.2801
+2026-05-08 18:49:54,024 - mmdet - INFO - Epoch [17][100/101]	lr: 1.000e-04, eta: 5:16:12, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0090, loss_rpn_bbox: 0.0048, loss_cls: 0.1424, acc: 93.8890, loss_bbox: 0.0862, loss: 0.2423
+2026-05-08 18:50:29,691 - mmdet - INFO - Epoch [18][50/101]	lr: 1.000e-04, eta: 5:15:54, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0079, loss_rpn_bbox: 0.0046, loss_cls: 0.1415, acc: 93.8828, loss_bbox: 0.0889, loss: 0.2429
+2026-05-08 18:51:01,912 - mmdet - INFO - Epoch [18][100/101]	lr: 1.000e-04, eta: 5:15:05, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0101, loss_rpn_bbox: 0.0051, loss_cls: 0.1557, acc: 93.2686, loss_bbox: 0.1035, loss: 0.2744
+2026-05-08 18:51:37,627 - mmdet - INFO - Epoch [19][50/101]	lr: 1.000e-04, eta: 5:14:48, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0084, loss_rpn_bbox: 0.0047, loss_cls: 0.1496, acc: 93.6232, loss_bbox: 0.0985, loss: 0.2612
+2026-05-08 18:52:09,852 - mmdet - INFO - Epoch [19][100/101]	lr: 1.000e-04, eta: 5:14:00, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0085, loss_rpn_bbox: 0.0056, loss_cls: 0.1487, acc: 93.5936, loss_bbox: 0.0919, loss: 0.2548
+2026-05-08 18:52:45,614 - mmdet - INFO - Epoch [20][50/101]	lr: 1.000e-04, eta: 5:13:42, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0101, loss_rpn_bbox: 0.0051, loss_cls: 0.1496, acc: 93.5508, loss_bbox: 0.0955, loss: 0.2604
+2026-05-08 18:53:17,728 - mmdet - INFO - Epoch [20][100/101]	lr: 1.000e-04, eta: 5:12:53, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0071, loss_rpn_bbox: 0.0043, loss_cls: 0.1255, acc: 94.6430, loss_bbox: 0.0839, loss: 0.2207
+2026-05-08 18:53:18,527 - mmdet - INFO - Saving checkpoint at 20 epochs
+2026-05-08 18:53:58,607 - mmdet - INFO - Evaluating bbox...
+2026-05-08 18:54:02,318 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.265
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.648
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.162
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.210
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.336
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.034
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.371
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.507
+
+2026-05-08 18:54:02,522 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_15.pth was removed
+2026-05-08 18:54:04,753 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_20.pth.
+2026-05-08 18:54:04,753 - mmdet - INFO - Best bbox_mAP is 0.2650 at 20 epoch.
+2026-05-08 18:54:04,754 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 18:54:04,754 - mmdet - INFO - Epoch(val) [20][371]	bbox_mAP: 0.2650, bbox_mAP_50: 0.6480, bbox_mAP_75: 0.1620, bbox_mAP_s: 0.0250, bbox_mAP_m: 0.2100, bbox_mAP_l: 0.3360, bbox_mAP_copypaste: 0.265 0.648 0.162 0.025 0.210 0.336
+2026-05-08 18:54:39,517 - mmdet - INFO - Epoch [21][50/101]	lr: 1.000e-04, eta: 5:12:31, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0064, loss_rpn_bbox: 0.0043, loss_cls: 0.1252, acc: 94.5705, loss_bbox: 0.0722, loss: 0.2080
+2026-05-08 18:55:11,485 - mmdet - INFO - Epoch [21][100/101]	lr: 1.000e-04, eta: 5:11:42, time: 0.639, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0078, loss_rpn_bbox: 0.0051, loss_cls: 0.1339, acc: 94.1657, loss_bbox: 0.0829, loss: 0.2298
+2026-05-08 18:55:47,256 - mmdet - INFO - Epoch [22][50/101]	lr: 1.000e-04, eta: 5:11:22, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0079, loss_rpn_bbox: 0.0046, loss_cls: 0.1398, acc: 93.9912, loss_bbox: 0.0857, loss: 0.2379
+2026-05-08 18:56:19,378 - mmdet - INFO - Epoch [22][100/101]	lr: 1.000e-04, eta: 5:10:35, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0071, loss_rpn_bbox: 0.0046, loss_cls: 0.1255, acc: 94.6396, loss_bbox: 0.0766, loss: 0.2138
+2026-05-08 18:56:55,086 - mmdet - INFO - Epoch [23][50/101]	lr: 1.000e-04, eta: 5:10:14, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0075, loss_rpn_bbox: 0.0039, loss_cls: 0.1122, acc: 95.2156, loss_bbox: 0.0677, loss: 0.1913
+2026-05-08 18:57:27,290 - mmdet - INFO - Epoch [23][100/101]	lr: 1.000e-04, eta: 5:09:29, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0079, loss_rpn_bbox: 0.0046, loss_cls: 0.1384, acc: 94.0437, loss_bbox: 0.0882, loss: 0.2392
+2026-05-08 18:58:03,081 - mmdet - INFO - Epoch [24][50/101]	lr: 1.000e-04, eta: 5:09:08, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0073, loss_rpn_bbox: 0.0046, loss_cls: 0.1240, acc: 94.6705, loss_bbox: 0.0739, loss: 0.2099
+2026-05-08 18:58:35,189 - mmdet - INFO - Epoch [24][100/101]	lr: 1.000e-04, eta: 5:08:22, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0054, loss_rpn_bbox: 0.0044, loss_cls: 0.1185, acc: 94.9399, loss_bbox: 0.0692, loss: 0.1976
+2026-05-08 18:59:10,888 - mmdet - INFO - Epoch [25][50/101]	lr: 1.000e-04, eta: 5:08:00, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0070, loss_rpn_bbox: 0.0042, loss_cls: 0.1189, acc: 94.8779, loss_bbox: 0.0661, loss: 0.1962
+2026-05-08 18:59:43,065 - mmdet - INFO - Epoch [25][100/101]	lr: 1.000e-04, eta: 5:07:16, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0077, loss_rpn_bbox: 0.0044, loss_cls: 0.1151, acc: 95.1948, loss_bbox: 0.0667, loss: 0.1939
+2026-05-08 19:00:21,669 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:00:25,199 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.261
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.640
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.147
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.206
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.334
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.420
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.420
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.420
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.028
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.357
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.509
+
+2026-05-08 19:00:25,206 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:00:25,206 - mmdet - INFO - Epoch(val) [25][371]	bbox_mAP: 0.2610, bbox_mAP_50: 0.6400, bbox_mAP_75: 0.1470, bbox_mAP_s: 0.0210, bbox_mAP_m: 0.2060, bbox_mAP_l: 0.3340, bbox_mAP_copypaste: 0.261 0.640 0.147 0.021 0.206 0.334
+2026-05-08 19:01:00,036 - mmdet - INFO - Epoch [26][50/101]	lr: 1.000e-04, eta: 5:06:52, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0069, loss_rpn_bbox: 0.0042, loss_cls: 0.1181, acc: 94.9023, loss_bbox: 0.0693, loss: 0.1985
+2026-05-08 19:01:32,199 - mmdet - INFO - Epoch [26][100/101]	lr: 1.000e-04, eta: 5:06:08, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0068, loss_rpn_bbox: 0.0038, loss_cls: 0.1113, acc: 95.2630, loss_bbox: 0.0627, loss: 0.1846
+2026-05-08 19:02:07,871 - mmdet - INFO - Epoch [27][50/101]	lr: 1.000e-04, eta: 5:05:45, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0042, loss_rpn_bbox: 0.0037, loss_cls: 0.1125, acc: 95.1038, loss_bbox: 0.0652, loss: 0.1856
+2026-05-08 19:02:40,184 - mmdet - INFO - Epoch [27][100/101]	lr: 1.000e-04, eta: 5:05:02, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0054, loss_rpn_bbox: 0.0044, loss_cls: 0.1106, acc: 95.2967, loss_bbox: 0.0631, loss: 0.1834
+2026-05-08 19:03:15,870 - mmdet - INFO - Epoch [28][50/101]	lr: 1.000e-04, eta: 5:04:39, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0055, loss_rpn_bbox: 0.0042, loss_cls: 0.1147, acc: 95.0963, loss_bbox: 0.0632, loss: 0.1875
+2026-05-08 19:03:48,086 - mmdet - INFO - Epoch [28][100/101]	lr: 1.000e-04, eta: 5:03:56, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0052, loss_rpn_bbox: 0.0034, loss_cls: 0.1110, acc: 95.2362, loss_bbox: 0.0626, loss: 0.1821
+2026-05-08 19:04:23,813 - mmdet - INFO - Epoch [29][50/101]	lr: 1.000e-04, eta: 5:03:32, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0047, loss_rpn_bbox: 0.0039, loss_cls: 0.1125, acc: 95.2613, loss_bbox: 0.0608, loss: 0.1819
+2026-05-08 19:04:56,023 - mmdet - INFO - Epoch [29][100/101]	lr: 1.000e-04, eta: 5:02:50, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0053, loss_rpn_bbox: 0.0037, loss_cls: 0.1069, acc: 95.3293, loss_bbox: 0.0651, loss: 0.1811
+2026-05-08 19:05:31,757 - mmdet - INFO - Epoch [30][50/101]	lr: 1.000e-04, eta: 5:02:26, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0047, loss_rpn_bbox: 0.0038, loss_cls: 0.1087, acc: 95.2936, loss_bbox: 0.0586, loss: 0.1758
+2026-05-08 19:06:03,944 - mmdet - INFO - Epoch [30][100/101]	lr: 1.000e-04, eta: 5:01:43, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0052, loss_rpn_bbox: 0.0040, loss_cls: 0.1030, acc: 95.6399, loss_bbox: 0.0581, loss: 0.1702
+2026-05-08 19:06:04,768 - mmdet - INFO - Saving checkpoint at 30 epochs
+2026-05-08 19:06:44,809 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:06:48,182 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.268
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.654
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.161
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.027
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.214
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.340
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.415
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.415
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.415
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.359
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.496
+
+2026-05-08 19:06:48,388 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_20.pth was removed
+2026-05-08 19:06:50,538 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_30.pth.
+2026-05-08 19:06:50,539 - mmdet - INFO - Best bbox_mAP is 0.2680 at 30 epoch.
+2026-05-08 19:06:50,539 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:06:50,539 - mmdet - INFO - Epoch(val) [30][371]	bbox_mAP: 0.2680, bbox_mAP_50: 0.6540, bbox_mAP_75: 0.1610, bbox_mAP_s: 0.0270, bbox_mAP_m: 0.2140, bbox_mAP_l: 0.3400, bbox_mAP_copypaste: 0.268 0.654 0.161 0.027 0.214 0.340
+2026-05-08 19:07:25,239 - mmdet - INFO - Epoch [31][50/101]	lr: 1.000e-04, eta: 5:01:17, time: 0.694, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0047, loss_rpn_bbox: 0.0041, loss_cls: 0.1009, acc: 95.6519, loss_bbox: 0.0542, loss: 0.1638
+2026-05-08 19:07:57,284 - mmdet - INFO - Epoch [31][100/101]	lr: 1.000e-04, eta: 5:00:33, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0056, loss_rpn_bbox: 0.0036, loss_cls: 0.1065, acc: 95.5320, loss_bbox: 0.0620, loss: 0.1776
+2026-05-08 19:08:32,950 - mmdet - INFO - Epoch [32][50/101]	lr: 1.000e-04, eta: 5:00:08, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0045, loss_rpn_bbox: 0.0032, loss_cls: 0.1019, acc: 95.6383, loss_bbox: 0.0536, loss: 0.1632
+2026-05-08 19:09:05,010 - mmdet - INFO - Epoch [32][100/101]	lr: 1.000e-04, eta: 4:59:25, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0040, loss_rpn_bbox: 0.0033, loss_cls: 0.1018, acc: 95.6111, loss_bbox: 0.0558, loss: 0.1649
+2026-05-08 19:09:40,763 - mmdet - INFO - Epoch [33][50/101]	lr: 1.000e-04, eta: 4:59:00, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0039, loss_rpn_bbox: 0.0037, loss_cls: 0.0968, acc: 95.8521, loss_bbox: 0.0544, loss: 0.1588
+2026-05-08 19:10:12,773 - mmdet - INFO - Epoch [33][100/101]	lr: 1.000e-04, eta: 4:58:17, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0038, loss_rpn_bbox: 0.0033, loss_cls: 0.0989, acc: 95.7744, loss_bbox: 0.0530, loss: 0.1590
+2026-05-08 19:10:48,486 - mmdet - INFO - Epoch [34][50/101]	lr: 1.000e-04, eta: 4:57:52, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0051, loss_rpn_bbox: 0.0038, loss_cls: 0.1028, acc: 95.6990, loss_bbox: 0.0593, loss: 0.1709
+2026-05-08 19:11:20,541 - mmdet - INFO - Epoch [34][100/101]	lr: 1.000e-04, eta: 4:57:10, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0050, loss_rpn_bbox: 0.0033, loss_cls: 0.0939, acc: 95.9791, loss_bbox: 0.0498, loss: 0.1520
+2026-05-08 19:11:56,231 - mmdet - INFO - Epoch [35][50/101]	lr: 1.000e-04, eta: 4:56:44, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0040, loss_rpn_bbox: 0.0035, loss_cls: 0.0940, acc: 95.9580, loss_bbox: 0.0497, loss: 0.1512
+2026-05-08 19:12:28,186 - mmdet - INFO - Epoch [35][100/101]	lr: 1.000e-04, eta: 4:56:01, time: 0.639, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0048, loss_rpn_bbox: 0.0038, loss_cls: 0.0972, acc: 95.8036, loss_bbox: 0.0525, loss: 0.1583
+2026-05-08 19:13:06,696 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:13:09,888 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.268
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.648
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.160
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.044
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.218
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.338
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.421
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.421
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.421
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.045
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.364
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.502
+
+2026-05-08 19:13:09,893 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:13:09,893 - mmdet - INFO - Epoch(val) [35][371]	bbox_mAP: 0.2680, bbox_mAP_50: 0.6480, bbox_mAP_75: 0.1600, bbox_mAP_s: 0.0440, bbox_mAP_m: 0.2180, bbox_mAP_l: 0.3380, bbox_mAP_copypaste: 0.268 0.648 0.160 0.044 0.218 0.338
+2026-05-08 19:13:44,657 - mmdet - INFO - Epoch [36][50/101]	lr: 1.000e-04, eta: 4:55:34, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0038, loss_rpn_bbox: 0.0031, loss_cls: 0.0870, acc: 96.3272, loss_bbox: 0.0433, loss: 0.1373
+2026-05-08 19:14:16,793 - mmdet - INFO - Epoch [36][100/101]	lr: 1.000e-04, eta: 4:54:53, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0044, loss_rpn_bbox: 0.0037, loss_cls: 0.0978, acc: 95.7966, loss_bbox: 0.0510, loss: 0.1569
+2026-05-08 19:14:52,491 - mmdet - INFO - Epoch [37][50/101]	lr: 1.000e-04, eta: 4:54:27, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0037, loss_rpn_bbox: 0.0030, loss_cls: 0.0922, acc: 96.0530, loss_bbox: 0.0465, loss: 0.1454
+2026-05-08 19:15:24,667 - mmdet - INFO - Epoch [37][100/101]	lr: 1.000e-04, eta: 4:53:47, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0034, loss_rpn_bbox: 0.0033, loss_cls: 0.0912, acc: 96.1515, loss_bbox: 0.0466, loss: 0.1445
+2026-05-08 19:16:00,551 - mmdet - INFO - Epoch [38][50/101]	lr: 1.000e-04, eta: 4:53:21, time: 0.702, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0040, loss_rpn_bbox: 0.0030, loss_cls: 0.0957, acc: 95.8819, loss_bbox: 0.0485, loss: 0.1514
+2026-05-08 19:16:32,722 - mmdet - INFO - Epoch [38][100/101]	lr: 1.000e-04, eta: 4:52:41, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0030, loss_rpn_bbox: 0.0030, loss_cls: 0.0856, acc: 96.3203, loss_bbox: 0.0434, loss: 0.1351
+2026-05-08 19:17:08,364 - mmdet - INFO - Epoch [39][50/101]	lr: 1.000e-04, eta: 4:52:14, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0032, loss_rpn_bbox: 0.0029, loss_cls: 0.0883, acc: 96.2372, loss_bbox: 0.0453, loss: 0.1397
+2026-05-08 19:17:40,620 - mmdet - INFO - Epoch [39][100/101]	lr: 1.000e-04, eta: 4:51:35, time: 0.645, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0033, loss_rpn_bbox: 0.0032, loss_cls: 0.0899, acc: 96.2235, loss_bbox: 0.0446, loss: 0.1411
+2026-05-08 19:18:16,210 - mmdet - INFO - Epoch [40][50/101]	lr: 1.000e-04, eta: 4:51:07, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0035, loss_rpn_bbox: 0.0030, loss_cls: 0.0829, acc: 96.4780, loss_bbox: 0.0407, loss: 0.1300
+2026-05-08 19:18:48,429 - mmdet - INFO - Epoch [40][100/101]	lr: 1.000e-04, eta: 4:50:27, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0034, loss_rpn_bbox: 0.0037, loss_cls: 0.0981, acc: 95.7701, loss_bbox: 0.0504, loss: 0.1557
+2026-05-08 19:18:49,222 - mmdet - INFO - Saving checkpoint at 40 epochs
+2026-05-08 19:19:29,359 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:19:32,480 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.265
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.637
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.168
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.215
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.332
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.048
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.363
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.499
+
+2026-05-08 19:19:32,486 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:19:32,486 - mmdet - INFO - Epoch(val) [40][371]	bbox_mAP: 0.2650, bbox_mAP_50: 0.6370, bbox_mAP_75: 0.1680, bbox_mAP_s: 0.0230, bbox_mAP_m: 0.2150, bbox_mAP_l: 0.3320, bbox_mAP_copypaste: 0.265 0.637 0.168 0.023 0.215 0.332
+2026-05-08 19:20:07,202 - mmdet - INFO - Epoch [41][50/101]	lr: 1.000e-04, eta: 4:49:59, time: 0.694, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0039, loss_rpn_bbox: 0.0030, loss_cls: 0.0898, acc: 96.1793, loss_bbox: 0.0473, loss: 0.1440
+2026-05-08 19:20:39,304 - mmdet - INFO - Epoch [41][100/101]	lr: 1.000e-04, eta: 4:49:19, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0068, loss_rpn_bbox: 0.0036, loss_cls: 0.1045, acc: 95.4938, loss_bbox: 0.0514, loss: 0.1663
+2026-05-08 19:21:15,020 - mmdet - INFO - Epoch [42][50/101]	lr: 1.000e-04, eta: 4:48:51, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0034, loss_rpn_bbox: 0.0034, loss_cls: 0.0919, acc: 96.1104, loss_bbox: 0.0478, loss: 0.1465
+2026-05-08 19:21:47,135 - mmdet - INFO - Epoch [42][100/101]	lr: 1.000e-04, eta: 4:48:12, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0032, loss_rpn_bbox: 0.0027, loss_cls: 0.0849, acc: 96.3143, loss_bbox: 0.0420, loss: 0.1328
+2026-05-08 19:22:22,787 - mmdet - INFO - Epoch [43][50/101]	lr: 1.000e-04, eta: 4:47:44, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0029, loss_rpn_bbox: 0.0026, loss_cls: 0.0854, acc: 96.3410, loss_bbox: 0.0432, loss: 0.1340
+2026-05-08 19:22:54,823 - mmdet - INFO - Epoch [43][100/101]	lr: 1.000e-04, eta: 4:47:04, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0027, loss_rpn_bbox: 0.0035, loss_cls: 0.0856, acc: 96.3685, loss_bbox: 0.0429, loss: 0.1347
+2026-05-08 19:23:30,552 - mmdet - INFO - Epoch [44][50/101]	lr: 1.000e-04, eta: 4:46:36, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0029, loss_rpn_bbox: 0.0029, loss_cls: 0.0864, acc: 96.3563, loss_bbox: 0.0452, loss: 0.1373
+2026-05-08 19:24:02,854 - mmdet - INFO - Epoch [44][100/101]	lr: 1.000e-04, eta: 4:45:58, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0034, loss_rpn_bbox: 0.0032, loss_cls: 0.0810, acc: 96.5590, loss_bbox: 0.0379, loss: 0.1256
+2026-05-08 19:24:38,692 - mmdet - INFO - Epoch [45][50/101]	lr: 1.000e-04, eta: 4:45:31, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0035, loss_rpn_bbox: 0.0028, loss_cls: 0.0849, acc: 96.4120, loss_bbox: 0.0428, loss: 0.1340
+2026-05-08 19:25:10,811 - mmdet - INFO - Epoch [45][100/101]	lr: 1.000e-04, eta: 4:44:52, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0027, loss_cls: 0.0796, acc: 96.5640, loss_bbox: 0.0382, loss: 0.1230
+2026-05-08 19:25:49,322 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:25:52,382 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.270
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.641
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.182
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.017
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.213
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.348
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.348
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.502
+
+2026-05-08 19:25:52,585 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_30.pth was removed
+2026-05-08 19:25:54,711 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_45.pth.
+2026-05-08 19:25:54,712 - mmdet - INFO - Best bbox_mAP is 0.2700 at 45 epoch.
+2026-05-08 19:25:54,712 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:25:54,712 - mmdet - INFO - Epoch(val) [45][371]	bbox_mAP: 0.2700, bbox_mAP_50: 0.6410, bbox_mAP_75: 0.1820, bbox_mAP_s: 0.0170, bbox_mAP_m: 0.2130, bbox_mAP_l: 0.3480, bbox_mAP_copypaste: 0.270 0.641 0.182 0.017 0.213 0.348
+2026-05-08 19:26:29,668 - mmdet - INFO - Epoch [46][50/101]	lr: 1.000e-04, eta: 4:44:24, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0028, loss_rpn_bbox: 0.0025, loss_cls: 0.0802, acc: 96.6344, loss_bbox: 0.0397, loss: 0.1252
+2026-05-08 19:27:01,639 - mmdet - INFO - Epoch [46][100/101]	lr: 1.000e-04, eta: 4:43:44, time: 0.639, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0026, loss_rpn_bbox: 0.0027, loss_cls: 0.0814, acc: 96.4995, loss_bbox: 0.0385, loss: 0.1251
+2026-05-08 19:27:37,322 - mmdet - INFO - Epoch [47][50/101]	lr: 1.000e-04, eta: 4:43:16, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0040, loss_rpn_bbox: 0.0034, loss_cls: 0.0919, acc: 96.0554, loss_bbox: 0.0443, loss: 0.1436
+2026-05-08 19:28:09,368 - mmdet - INFO - Epoch [47][100/101]	lr: 1.000e-04, eta: 4:42:36, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0026, loss_cls: 0.0780, acc: 96.6739, loss_bbox: 0.0383, loss: 0.1207
+2026-05-08 19:28:45,018 - mmdet - INFO - Epoch [48][50/101]	lr: 1.000e-04, eta: 4:42:08, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0032, loss_rpn_bbox: 0.0033, loss_cls: 0.0810, acc: 96.4980, loss_bbox: 0.0391, loss: 0.1266
+2026-05-08 19:29:17,363 - mmdet - INFO - Epoch [48][100/101]	lr: 1.000e-04, eta: 4:41:30, time: 0.647, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0029, loss_rpn_bbox: 0.0030, loss_cls: 0.0823, acc: 96.4919, loss_bbox: 0.0398, loss: 0.1280
+2026-05-08 19:29:53,117 - mmdet - INFO - Epoch [49][50/101]	lr: 1.000e-04, eta: 4:41:02, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0032, loss_rpn_bbox: 0.0027, loss_cls: 0.0826, acc: 96.4834, loss_bbox: 0.0382, loss: 0.1267
+2026-05-08 19:30:25,292 - mmdet - INFO - Epoch [49][100/101]	lr: 1.000e-04, eta: 4:40:24, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0033, loss_rpn_bbox: 0.0030, loss_cls: 0.0824, acc: 96.5859, loss_bbox: 0.0417, loss: 0.1305
+2026-05-08 19:31:00,956 - mmdet - INFO - Epoch [50][50/101]	lr: 1.000e-04, eta: 4:39:55, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0026, loss_rpn_bbox: 0.0033, loss_cls: 0.0808, acc: 96.5313, loss_bbox: 0.0374, loss: 0.1240
+2026-05-08 19:31:33,095 - mmdet - INFO - Epoch [50][100/101]	lr: 1.000e-04, eta: 4:39:17, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0039, loss_rpn_bbox: 0.0026, loss_cls: 0.0820, acc: 96.5341, loss_bbox: 0.0417, loss: 0.1301
+2026-05-08 19:31:33,898 - mmdet - INFO - Saving checkpoint at 50 epochs
+2026-05-08 19:32:13,995 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:32:17,108 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.271
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.648
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.170
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.220
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.341
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.034
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.365
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.505
+
+2026-05-08 19:32:17,310 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_45.pth was removed
+2026-05-08 19:32:19,477 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_50.pth.
+2026-05-08 19:32:19,477 - mmdet - INFO - Best bbox_mAP is 0.2710 at 50 epoch.
+2026-05-08 19:32:19,477 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:32:19,478 - mmdet - INFO - Epoch(val) [50][371]	bbox_mAP: 0.2710, bbox_mAP_50: 0.6480, bbox_mAP_75: 0.1700, bbox_mAP_s: 0.0290, bbox_mAP_m: 0.2200, bbox_mAP_l: 0.3410, bbox_mAP_copypaste: 0.271 0.648 0.170 0.029 0.220 0.341
+2026-05-08 19:32:54,219 - mmdet - INFO - Epoch [51][50/101]	lr: 1.000e-04, eta: 4:38:47, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0026, loss_rpn_bbox: 0.0024, loss_cls: 0.0773, acc: 96.6764, loss_bbox: 0.0362, loss: 0.1186
+2026-05-08 19:33:26,508 - mmdet - INFO - Epoch [51][100/101]	lr: 1.000e-04, eta: 4:38:09, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0035, loss_rpn_bbox: 0.0030, loss_cls: 0.0877, acc: 96.2229, loss_bbox: 0.0412, loss: 0.1354
+2026-05-08 19:34:02,280 - mmdet - INFO - Epoch [52][50/101]	lr: 1.000e-04, eta: 4:37:41, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0025, loss_cls: 0.0804, acc: 96.5508, loss_bbox: 0.0374, loss: 0.1229
+2026-05-08 19:34:34,418 - mmdet - INFO - Epoch [52][100/101]	lr: 1.000e-04, eta: 4:37:03, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0021, loss_rpn_bbox: 0.0029, loss_cls: 0.0758, acc: 96.7530, loss_bbox: 0.0354, loss: 0.1162
+2026-05-08 19:35:10,164 - mmdet - INFO - Epoch [53][50/101]	lr: 1.000e-04, eta: 4:36:34, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0023, loss_rpn_bbox: 0.0027, loss_cls: 0.0728, acc: 96.8864, loss_bbox: 0.0343, loss: 0.1121
+2026-05-08 19:35:42,209 - mmdet - INFO - Epoch [53][100/101]	lr: 1.000e-04, eta: 4:35:56, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0028, loss_cls: 0.0768, acc: 96.6705, loss_bbox: 0.0345, loss: 0.1164
+2026-05-08 19:36:18,000 - mmdet - INFO - Epoch [54][50/101]	lr: 1.000e-04, eta: 4:35:27, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0021, loss_rpn_bbox: 0.0027, loss_cls: 0.0789, acc: 96.6687, loss_bbox: 0.0387, loss: 0.1224
+2026-05-08 19:36:50,195 - mmdet - INFO - Epoch [54][100/101]	lr: 1.000e-04, eta: 4:34:49, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0027, loss_cls: 0.0762, acc: 96.7514, loss_bbox: 0.0335, loss: 0.1149
+2026-05-08 19:37:25,972 - mmdet - INFO - Epoch [55][50/101]	lr: 1.000e-04, eta: 4:34:20, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0028, loss_cls: 0.0755, acc: 96.7499, loss_bbox: 0.0338, loss: 0.1146
+2026-05-08 19:37:58,133 - mmdet - INFO - Epoch [55][100/101]	lr: 1.000e-04, eta: 4:33:43, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0027, loss_rpn_bbox: 0.0024, loss_cls: 0.0782, acc: 96.6113, loss_bbox: 0.0357, loss: 0.1189
+2026-05-08 19:38:36,775 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:38:39,906 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.286
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.663
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.187
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.011
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.232
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.356
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.031
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.364
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.517
+
+2026-05-08 19:38:40,111 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_50.pth was removed
+2026-05-08 19:38:42,219 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_55.pth.
+2026-05-08 19:38:42,219 - mmdet - INFO - Best bbox_mAP is 0.2860 at 55 epoch.
+2026-05-08 19:38:42,219 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:38:42,219 - mmdet - INFO - Epoch(val) [55][371]	bbox_mAP: 0.2860, bbox_mAP_50: 0.6630, bbox_mAP_75: 0.1870, bbox_mAP_s: 0.0110, bbox_mAP_m: 0.2320, bbox_mAP_l: 0.3560, bbox_mAP_copypaste: 0.286 0.663 0.187 0.011 0.232 0.356
+2026-05-08 19:39:17,075 - mmdet - INFO - Epoch [56][50/101]	lr: 1.000e-04, eta: 4:33:13, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0026, loss_rpn_bbox: 0.0023, loss_cls: 0.0764, acc: 96.7085, loss_bbox: 0.0350, loss: 0.1163
+2026-05-08 19:39:49,246 - mmdet - INFO - Epoch [56][100/101]	lr: 1.000e-04, eta: 4:32:36, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0025, loss_cls: 0.0741, acc: 96.8588, loss_bbox: 0.0329, loss: 0.1114
+2026-05-08 19:40:25,118 - mmdet - INFO - Epoch [57][50/101]	lr: 1.000e-04, eta: 4:32:07, time: 0.701, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0027, loss_rpn_bbox: 0.0026, loss_cls: 0.0737, acc: 96.8889, loss_bbox: 0.0332, loss: 0.1123
+2026-05-08 19:40:57,276 - mmdet - INFO - Epoch [57][100/101]	lr: 1.000e-04, eta: 4:31:29, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0022, loss_cls: 0.0701, acc: 96.9493, loss_bbox: 0.0316, loss: 0.1054
+2026-05-08 19:41:33,095 - mmdet - INFO - Epoch [58][50/101]	lr: 1.000e-04, eta: 4:31:00, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0026, loss_rpn_bbox: 0.0024, loss_cls: 0.0748, acc: 96.7553, loss_bbox: 0.0339, loss: 0.1137
+2026-05-08 19:42:05,287 - mmdet - INFO - Epoch [58][100/101]	lr: 1.000e-04, eta: 4:30:23, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0030, loss_rpn_bbox: 0.0028, loss_cls: 0.0707, acc: 96.9300, loss_bbox: 0.0348, loss: 0.1111
+2026-05-08 19:42:40,955 - mmdet - INFO - Epoch [59][50/101]	lr: 1.000e-04, eta: 4:29:53, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0023, loss_cls: 0.0690, acc: 97.0640, loss_bbox: 0.0314, loss: 0.1046
+2026-05-08 19:43:13,072 - mmdet - INFO - Epoch [59][100/101]	lr: 1.000e-04, eta: 4:29:16, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0021, loss_rpn_bbox: 0.0027, loss_cls: 0.0725, acc: 96.9693, loss_bbox: 0.0326, loss: 0.1099
+2026-05-08 19:43:48,784 - mmdet - INFO - Epoch [60][50/101]	lr: 1.000e-04, eta: 4:28:46, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0027, loss_cls: 0.0744, acc: 96.7710, loss_bbox: 0.0351, loss: 0.1143
+2026-05-08 19:44:20,935 - mmdet - INFO - Epoch [60][100/101]	lr: 1.000e-04, eta: 4:28:09, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0017, loss_rpn_bbox: 0.0020, loss_cls: 0.0672, acc: 97.1318, loss_bbox: 0.0304, loss: 0.1013
+2026-05-08 19:44:21,727 - mmdet - INFO - Saving checkpoint at 60 epochs
+2026-05-08 19:45:02,007 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:45:05,215 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.283
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.667
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.197
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.226
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.359
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.371
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.518
+
+2026-05-08 19:45:05,220 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:45:05,220 - mmdet - INFO - Epoch(val) [60][371]	bbox_mAP: 0.2830, bbox_mAP_50: 0.6670, bbox_mAP_75: 0.1970, bbox_mAP_s: 0.0210, bbox_mAP_m: 0.2260, bbox_mAP_l: 0.3590, bbox_mAP_copypaste: 0.283 0.667 0.197 0.021 0.226 0.359
+2026-05-08 19:45:40,050 - mmdet - INFO - Epoch [61][50/101]	lr: 1.000e-04, eta: 4:27:39, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0025, loss_cls: 0.0746, acc: 96.7400, loss_bbox: 0.0313, loss: 0.1108
+2026-05-08 19:46:12,179 - mmdet - INFO - Epoch [61][100/101]	lr: 1.000e-04, eta: 4:27:01, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0021, loss_rpn_bbox: 0.0024, loss_cls: 0.0703, acc: 96.9499, loss_bbox: 0.0308, loss: 0.1057
+2026-05-08 19:46:47,860 - mmdet - INFO - Epoch [62][50/101]	lr: 1.000e-04, eta: 4:26:31, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0019, loss_cls: 0.0699, acc: 97.0160, loss_bbox: 0.0292, loss: 0.1025
+2026-05-08 19:47:19,928 - mmdet - INFO - Epoch [62][100/101]	lr: 1.000e-04, eta: 4:25:54, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0023, loss_rpn_bbox: 0.0025, loss_cls: 0.0703, acc: 96.9888, loss_bbox: 0.0323, loss: 0.1074
+2026-05-08 19:47:55,606 - mmdet - INFO - Epoch [63][50/101]	lr: 1.000e-04, eta: 4:25:24, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0023, loss_cls: 0.0717, acc: 96.9014, loss_bbox: 0.0298, loss: 0.1063
+2026-05-08 19:48:27,816 - mmdet - INFO - Epoch [63][100/101]	lr: 1.000e-04, eta: 4:24:47, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0027, loss_cls: 0.0658, acc: 97.2019, loss_bbox: 0.0303, loss: 0.1007
+2026-05-08 19:49:03,343 - mmdet - INFO - Epoch [64][50/101]	lr: 1.000e-04, eta: 4:24:16, time: 0.694, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0024, loss_cls: 0.0630, acc: 97.3489, loss_bbox: 0.0284, loss: 0.0955
+2026-05-08 19:49:35,413 - mmdet - INFO - Epoch [64][100/101]	lr: 1.000e-04, eta: 4:23:39, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0023, loss_cls: 0.0660, acc: 97.1955, loss_bbox: 0.0288, loss: 0.0990
+2026-05-08 19:50:11,512 - mmdet - INFO - Epoch [65][50/101]	lr: 1.000e-04, eta: 4:23:10, time: 0.706, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0023, loss_cls: 0.0697, acc: 96.9806, loss_bbox: 0.0304, loss: 0.1041
+2026-05-08 19:50:43,763 - mmdet - INFO - Epoch [65][100/101]	lr: 1.000e-04, eta: 4:22:34, time: 0.645, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0022, loss_cls: 0.0674, acc: 97.1508, loss_bbox: 0.0296, loss: 0.1009
+2026-05-08 19:51:22,238 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:51:25,212 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.283
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.654
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.183
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.227
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.357
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.417
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.417
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.417
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.358
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.502
+
+2026-05-08 19:51:25,217 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:51:25,217 - mmdet - INFO - Epoch(val) [65][371]	bbox_mAP: 0.2830, bbox_mAP_50: 0.6540, bbox_mAP_75: 0.1830, bbox_mAP_s: 0.0210, bbox_mAP_m: 0.2270, bbox_mAP_l: 0.3570, bbox_mAP_copypaste: 0.283 0.654 0.183 0.021 0.227 0.357
+2026-05-08 19:52:00,170 - mmdet - INFO - Epoch [66][50/101]	lr: 1.000e-04, eta: 4:22:04, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0024, loss_cls: 0.0671, acc: 97.1396, loss_bbox: 0.0291, loss: 0.1010
+2026-05-08 19:52:32,359 - mmdet - INFO - Epoch [66][100/101]	lr: 1.000e-04, eta: 4:21:27, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0023, loss_cls: 0.0647, acc: 97.2701, loss_bbox: 0.0297, loss: 0.0980
+2026-05-08 19:53:08,052 - mmdet - INFO - Epoch [67][50/101]	lr: 1.000e-04, eta: 4:20:57, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0024, loss_cls: 0.0666, acc: 97.1734, loss_bbox: 0.0320, loss: 0.1025
+2026-05-08 19:53:40,209 - mmdet - INFO - Epoch [67][100/101]	lr: 1.000e-04, eta: 4:20:20, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0022, loss_cls: 0.0676, acc: 97.1221, loss_bbox: 0.0304, loss: 0.1026
+2026-05-08 19:54:15,915 - mmdet - INFO - Epoch [68][50/101]	lr: 1.000e-04, eta: 4:19:50, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0022, loss_cls: 0.0645, acc: 97.2761, loss_bbox: 0.0278, loss: 0.0964
+2026-05-08 19:54:48,055 - mmdet - INFO - Epoch [68][100/101]	lr: 1.000e-04, eta: 4:19:13, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0017, loss_rpn_bbox: 0.0024, loss_cls: 0.0667, acc: 97.0878, loss_bbox: 0.0313, loss: 0.1020
+2026-05-08 19:55:23,792 - mmdet - INFO - Epoch [69][50/101]	lr: 1.000e-04, eta: 4:18:43, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0032, loss_rpn_bbox: 0.0025, loss_cls: 0.0688, acc: 97.0772, loss_bbox: 0.0307, loss: 0.1052
+2026-05-08 19:55:55,922 - mmdet - INFO - Epoch [69][100/101]	lr: 1.000e-04, eta: 4:18:06, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0022, loss_rpn_bbox: 0.0026, loss_cls: 0.0635, acc: 97.3302, loss_bbox: 0.0296, loss: 0.0979
+2026-05-08 19:56:31,716 - mmdet - INFO - Epoch [70][50/101]	lr: 1.000e-04, eta: 4:17:36, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0029, loss_rpn_bbox: 0.0030, loss_cls: 0.0681, acc: 97.1156, loss_bbox: 0.0272, loss: 0.1012
+2026-05-08 19:57:03,883 - mmdet - INFO - Epoch [70][100/101]	lr: 1.000e-04, eta: 4:16:59, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0027, loss_cls: 0.0671, acc: 97.1020, loss_bbox: 0.0264, loss: 0.0986
+2026-05-08 19:57:04,682 - mmdet - INFO - Saving checkpoint at 70 epochs
+2026-05-08 19:57:44,656 - mmdet - INFO - Evaluating bbox...
+2026-05-08 19:57:47,425 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.276
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.642
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.191
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.028
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.226
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.344
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.406
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.406
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.406
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.048
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.350
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.487
+
+2026-05-08 19:57:47,430 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 19:57:47,430 - mmdet - INFO - Epoch(val) [70][371]	bbox_mAP: 0.2760, bbox_mAP_50: 0.6420, bbox_mAP_75: 0.1910, bbox_mAP_s: 0.0280, bbox_mAP_m: 0.2260, bbox_mAP_l: 0.3440, bbox_mAP_copypaste: 0.276 0.642 0.191 0.028 0.226 0.344
+2026-05-08 19:58:22,280 - mmdet - INFO - Epoch [71][50/101]	lr: 1.000e-04, eta: 4:16:29, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0022, loss_cls: 0.0698, acc: 97.0819, loss_bbox: 0.0295, loss: 0.1038
+2026-05-08 19:58:54,366 - mmdet - INFO - Epoch [71][100/101]	lr: 1.000e-04, eta: 4:15:52, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0017, loss_rpn_bbox: 0.0022, loss_cls: 0.0637, acc: 97.3404, loss_bbox: 0.0257, loss: 0.0933
+2026-05-08 19:59:29,983 - mmdet - INFO - Epoch [72][50/101]	lr: 1.000e-04, eta: 4:15:21, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0024, loss_cls: 0.0616, acc: 97.3954, loss_bbox: 0.0255, loss: 0.0907
+2026-05-08 20:00:02,114 - mmdet - INFO - Epoch [72][100/101]	lr: 1.000e-04, eta: 4:14:45, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0023, loss_rpn_bbox: 0.0021, loss_cls: 0.0679, acc: 97.1308, loss_bbox: 0.0320, loss: 0.1043
+2026-05-08 20:00:37,717 - mmdet - INFO - Epoch [73][50/101]	lr: 1.000e-04, eta: 4:14:14, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0017, loss_cls: 0.0622, acc: 97.3478, loss_bbox: 0.0270, loss: 0.0922
+2026-05-08 20:01:09,864 - mmdet - INFO - Epoch [73][100/101]	lr: 1.000e-04, eta: 4:13:37, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0024, loss_cls: 0.0679, acc: 97.1383, loss_bbox: 0.0298, loss: 0.1020
+2026-05-08 20:01:45,437 - mmdet - INFO - Epoch [74][50/101]	lr: 1.000e-04, eta: 4:13:06, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0025, loss_cls: 0.0673, acc: 97.2173, loss_bbox: 0.0292, loss: 0.1009
+2026-05-08 20:02:17,647 - mmdet - INFO - Epoch [74][100/101]	lr: 1.000e-04, eta: 4:12:30, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0022, loss_cls: 0.0633, acc: 97.3086, loss_bbox: 0.0278, loss: 0.0950
+2026-05-08 20:02:53,562 - mmdet - INFO - Epoch [75][50/101]	lr: 1.000e-04, eta: 4:12:00, time: 0.702, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0020, loss_cls: 0.0669, acc: 97.1472, loss_bbox: 0.0272, loss: 0.0981
+2026-05-08 20:03:25,866 - mmdet - INFO - Epoch [75][100/101]	lr: 1.000e-04, eta: 4:11:24, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0020, loss_cls: 0.0621, acc: 97.3027, loss_bbox: 0.0253, loss: 0.0905
+2026-05-08 20:04:04,406 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:04:07,585 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.289
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.665
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.196
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.239
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.360
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.433
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.433
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.433
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.376
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.517
+
+2026-05-08 20:04:07,792 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_55.pth was removed
+2026-05-08 20:04:09,929 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_75.pth.
+2026-05-08 20:04:09,929 - mmdet - INFO - Best bbox_mAP is 0.2890 at 75 epoch.
+2026-05-08 20:04:09,930 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:04:09,930 - mmdet - INFO - Epoch(val) [75][371]	bbox_mAP: 0.2890, bbox_mAP_50: 0.6650, bbox_mAP_75: 0.1960, bbox_mAP_s: 0.0210, bbox_mAP_m: 0.2390, bbox_mAP_l: 0.3600, bbox_mAP_copypaste: 0.289 0.665 0.196 0.021 0.239 0.360
+2026-05-08 20:04:44,773 - mmdet - INFO - Epoch [76][50/101]	lr: 1.000e-04, eta: 4:10:53, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0020, loss_cls: 0.0619, acc: 97.3922, loss_bbox: 0.0266, loss: 0.0918
+2026-05-08 20:05:17,207 - mmdet - INFO - Epoch [76][100/101]	lr: 1.000e-04, eta: 4:10:18, time: 0.649, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0026, loss_cls: 0.0651, acc: 97.1975, loss_bbox: 0.0261, loss: 0.0948
+2026-05-08 20:05:53,051 - mmdet - INFO - Epoch [77][50/101]	lr: 1.000e-04, eta: 4:09:47, time: 0.701, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0019, loss_cls: 0.0624, acc: 97.3818, loss_bbox: 0.0269, loss: 0.0925
+2026-05-08 20:06:25,362 - mmdet - INFO - Epoch [77][100/101]	lr: 1.000e-04, eta: 4:09:12, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0023, loss_cls: 0.0656, acc: 97.1836, loss_bbox: 0.0298, loss: 0.0991
+2026-05-08 20:07:01,084 - mmdet - INFO - Epoch [78][50/101]	lr: 1.000e-04, eta: 4:08:41, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0020, loss_cls: 0.0625, acc: 97.3487, loss_bbox: 0.0260, loss: 0.0917
+2026-05-08 20:07:33,290 - mmdet - INFO - Epoch [78][100/101]	lr: 1.000e-04, eta: 4:08:05, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0023, loss_cls: 0.0674, acc: 97.1185, loss_bbox: 0.0313, loss: 0.1026
+2026-05-08 20:08:09,007 - mmdet - INFO - Epoch [79][50/101]	lr: 1.000e-04, eta: 4:07:34, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0017, loss_rpn_bbox: 0.0021, loss_cls: 0.0618, acc: 97.3953, loss_bbox: 0.0254, loss: 0.0910
+2026-05-08 20:08:41,128 - mmdet - INFO - Epoch [79][100/101]	lr: 1.000e-04, eta: 4:06:58, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0019, loss_cls: 0.0611, acc: 97.4285, loss_bbox: 0.0257, loss: 0.0902
+2026-05-08 20:09:16,802 - mmdet - INFO - Epoch [80][50/101]	lr: 1.000e-04, eta: 4:06:27, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0019, loss_cls: 0.0614, acc: 97.4047, loss_bbox: 0.0286, loss: 0.0931
+2026-05-08 20:09:48,981 - mmdet - INFO - Epoch [80][100/101]	lr: 1.000e-04, eta: 4:05:51, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0019, loss_cls: 0.0646, acc: 97.2701, loss_bbox: 0.0261, loss: 0.0942
+2026-05-08 20:09:49,777 - mmdet - INFO - Saving checkpoint at 80 epochs
+2026-05-08 20:10:29,876 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:10:33,012 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.293
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.680
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.199
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.017
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.237
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.365
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.436
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.436
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.436
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.072
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.380
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.516
+
+2026-05-08 20:10:33,214 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_75.pth was removed
+2026-05-08 20:10:35,376 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_80.pth.
+2026-05-08 20:10:35,376 - mmdet - INFO - Best bbox_mAP is 0.2930 at 80 epoch.
+2026-05-08 20:10:35,377 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:10:35,377 - mmdet - INFO - Epoch(val) [80][371]	bbox_mAP: 0.2930, bbox_mAP_50: 0.6800, bbox_mAP_75: 0.1990, bbox_mAP_s: 0.0170, bbox_mAP_m: 0.2370, bbox_mAP_l: 0.3650, bbox_mAP_copypaste: 0.293 0.680 0.199 0.017 0.237 0.365
+2026-05-08 20:11:10,292 - mmdet - INFO - Epoch [81][50/101]	lr: 1.000e-04, eta: 4:05:20, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0018, loss_cls: 0.0587, acc: 97.4912, loss_bbox: 0.0242, loss: 0.0861
+2026-05-08 20:11:42,399 - mmdet - INFO - Epoch [81][100/101]	lr: 1.000e-04, eta: 4:04:43, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0022, loss_cls: 0.0619, acc: 97.3978, loss_bbox: 0.0253, loss: 0.0907
+2026-05-08 20:12:18,083 - mmdet - INFO - Epoch [82][50/101]	lr: 1.000e-04, eta: 4:04:12, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0017, loss_rpn_bbox: 0.0021, loss_cls: 0.0609, acc: 97.4459, loss_bbox: 0.0262, loss: 0.0909
+2026-05-08 20:12:50,188 - mmdet - INFO - Epoch [82][100/101]	lr: 1.000e-04, eta: 4:03:36, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0019, loss_cls: 0.0603, acc: 97.3937, loss_bbox: 0.0243, loss: 0.0885
+2026-05-08 20:13:25,954 - mmdet - INFO - Epoch [83][50/101]	lr: 1.000e-04, eta: 4:03:05, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0023, loss_cls: 0.0720, acc: 97.0021, loss_bbox: 0.0288, loss: 0.1056
+2026-05-08 20:13:58,038 - mmdet - INFO - Epoch [83][100/101]	lr: 1.000e-04, eta: 4:02:29, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0040, loss_rpn_bbox: 0.0025, loss_cls: 0.0674, acc: 97.1450, loss_bbox: 0.0292, loss: 0.1031
+2026-05-08 20:14:33,616 - mmdet - INFO - Epoch [84][50/101]	lr: 1.000e-04, eta: 4:01:58, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0020, loss_cls: 0.0602, acc: 97.4366, loss_bbox: 0.0246, loss: 0.0886
+2026-05-08 20:15:05,758 - mmdet - INFO - Epoch [84][100/101]	lr: 1.000e-04, eta: 4:01:22, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0020, loss_cls: 0.0614, acc: 97.3920, loss_bbox: 0.0265, loss: 0.0917
+2026-05-08 20:15:41,318 - mmdet - INFO - Epoch [85][50/101]	lr: 1.000e-04, eta: 4:00:50, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0020, loss_cls: 0.0584, acc: 97.5225, loss_bbox: 0.0244, loss: 0.0864
+2026-05-08 20:16:13,518 - mmdet - INFO - Epoch [85][100/101]	lr: 1.000e-04, eta: 4:00:14, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0023, loss_cls: 0.0639, acc: 97.2586, loss_bbox: 0.0264, loss: 0.0945
+2026-05-08 20:16:52,173 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:16:55,113 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.290
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.671
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.202
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.030
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.236
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.362
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.424
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.424
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.424
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.045
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.363
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.510
+
+2026-05-08 20:16:55,118 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:16:55,118 - mmdet - INFO - Epoch(val) [85][371]	bbox_mAP: 0.2900, bbox_mAP_50: 0.6710, bbox_mAP_75: 0.2020, bbox_mAP_s: 0.0300, bbox_mAP_m: 0.2360, bbox_mAP_l: 0.3620, bbox_mAP_copypaste: 0.290 0.671 0.202 0.030 0.236 0.362
+2026-05-08 20:17:30,033 - mmdet - INFO - Epoch [86][50/101]	lr: 1.000e-04, eta: 3:59:43, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0018, loss_cls: 0.0554, acc: 97.6134, loss_bbox: 0.0230, loss: 0.0815
+2026-05-08 20:18:02,242 - mmdet - INFO - Epoch [86][100/101]	lr: 1.000e-04, eta: 3:59:08, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0025, loss_cls: 0.0646, acc: 97.2066, loss_bbox: 0.0275, loss: 0.0962
+2026-05-08 20:18:38,050 - mmdet - INFO - Epoch [87][50/101]	lr: 1.000e-04, eta: 3:58:37, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0021, loss_cls: 0.0625, acc: 97.3840, loss_bbox: 0.0261, loss: 0.0923
+2026-05-08 20:19:10,360 - mmdet - INFO - Epoch [87][100/101]	lr: 1.000e-04, eta: 3:58:01, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0022, loss_cls: 0.0662, acc: 97.2491, loss_bbox: 0.0255, loss: 0.0964
+2026-05-08 20:19:46,080 - mmdet - INFO - Epoch [88][50/101]	lr: 1.000e-04, eta: 3:57:30, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0024, loss_rpn_bbox: 0.0023, loss_cls: 0.0572, acc: 97.5677, loss_bbox: 0.0236, loss: 0.0856
+2026-05-08 20:20:18,258 - mmdet - INFO - Epoch [88][100/101]	lr: 1.000e-04, eta: 3:56:54, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0019, loss_cls: 0.0602, acc: 97.3798, loss_bbox: 0.0243, loss: 0.0880
+2026-05-08 20:20:53,952 - mmdet - INFO - Epoch [89][50/101]	lr: 1.000e-04, eta: 3:56:23, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0017, loss_cls: 0.0529, acc: 97.7410, loss_bbox: 0.0229, loss: 0.0787
+2026-05-08 20:21:26,091 - mmdet - INFO - Epoch [89][100/101]	lr: 1.000e-04, eta: 3:55:47, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0025, loss_cls: 0.0628, acc: 97.3554, loss_bbox: 0.0252, loss: 0.0918
+2026-05-08 20:22:01,777 - mmdet - INFO - Epoch [90][50/101]	lr: 1.000e-04, eta: 3:55:16, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0020, loss_cls: 0.0598, acc: 97.4853, loss_bbox: 0.0235, loss: 0.0867
+2026-05-08 20:22:33,988 - mmdet - INFO - Epoch [90][100/101]	lr: 1.000e-04, eta: 3:54:40, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0019, loss_cls: 0.0594, acc: 97.4656, loss_bbox: 0.0252, loss: 0.0880
+2026-05-08 20:22:34,782 - mmdet - INFO - Saving checkpoint at 90 epochs
+2026-05-08 20:23:14,706 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:23:17,692 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.290
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.662
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.203
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.236
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.363
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.361
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.510
+
+2026-05-08 20:23:17,697 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:23:17,697 - mmdet - INFO - Epoch(val) [90][371]	bbox_mAP: 0.2900, bbox_mAP_50: 0.6620, bbox_mAP_75: 0.2030, bbox_mAP_s: 0.0240, bbox_mAP_m: 0.2360, bbox_mAP_l: 0.3630, bbox_mAP_copypaste: 0.290 0.662 0.203 0.024 0.236 0.363
+2026-05-08 20:23:52,595 - mmdet - INFO - Epoch [91][50/101]	lr: 1.000e-04, eta: 3:54:09, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0018, loss_cls: 0.0561, acc: 97.5713, loss_bbox: 0.0226, loss: 0.0818
+2026-05-08 20:24:24,746 - mmdet - INFO - Epoch [91][100/101]	lr: 1.000e-04, eta: 3:53:33, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0021, loss_cls: 0.0597, acc: 97.4473, loss_bbox: 0.0238, loss: 0.0867
+2026-05-08 20:25:00,340 - mmdet - INFO - Epoch [92][50/101]	lr: 1.000e-04, eta: 3:53:01, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0019, loss_cls: 0.0579, acc: 97.5070, loss_bbox: 0.0228, loss: 0.0837
+2026-05-08 20:25:32,352 - mmdet - INFO - Epoch [92][100/101]	lr: 1.000e-04, eta: 3:52:25, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0022, loss_cls: 0.0575, acc: 97.5699, loss_bbox: 0.0238, loss: 0.0852
+2026-05-08 20:26:08,041 - mmdet - INFO - Epoch [93][50/101]	lr: 1.000e-04, eta: 3:51:54, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0020, loss_cls: 0.0572, acc: 97.5254, loss_bbox: 0.0244, loss: 0.0852
+2026-05-08 20:26:40,141 - mmdet - INFO - Epoch [93][100/101]	lr: 1.000e-04, eta: 3:51:18, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0020, loss_cls: 0.0585, acc: 97.5098, loss_bbox: 0.0231, loss: 0.0850
+2026-05-08 20:27:15,737 - mmdet - INFO - Epoch [94][50/101]	lr: 1.000e-04, eta: 3:50:47, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0018, loss_cls: 0.0575, acc: 97.5406, loss_bbox: 0.0234, loss: 0.0839
+2026-05-08 20:27:47,881 - mmdet - INFO - Epoch [94][100/101]	lr: 1.000e-04, eta: 3:50:11, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0019, loss_cls: 0.0600, acc: 97.4355, loss_bbox: 0.0242, loss: 0.0874
+2026-05-08 20:28:23,666 - mmdet - INFO - Epoch [95][50/101]	lr: 1.000e-04, eta: 3:49:40, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0018, loss_cls: 0.0585, acc: 97.5158, loss_bbox: 0.0243, loss: 0.0865
+2026-05-08 20:28:55,820 - mmdet - INFO - Epoch [95][100/101]	lr: 1.000e-04, eta: 3:49:04, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0016, loss_cls: 0.0585, acc: 97.4918, loss_bbox: 0.0232, loss: 0.0847
+2026-05-08 20:29:34,424 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:29:37,446 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.293
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.666
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.206
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.037
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.240
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.362
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.432
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.432
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.432
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.076
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.377
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.511
+
+2026-05-08 20:29:37,452 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:29:37,452 - mmdet - INFO - Epoch(val) [95][371]	bbox_mAP: 0.2930, bbox_mAP_50: 0.6660, bbox_mAP_75: 0.2060, bbox_mAP_s: 0.0370, bbox_mAP_m: 0.2400, bbox_mAP_l: 0.3620, bbox_mAP_copypaste: 0.293 0.666 0.206 0.037 0.240 0.362
+2026-05-08 20:30:12,321 - mmdet - INFO - Epoch [96][50/101]	lr: 1.000e-04, eta: 3:48:32, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0017, loss_cls: 0.0562, acc: 97.5767, loss_bbox: 0.0229, loss: 0.0817
+2026-05-08 20:30:44,416 - mmdet - INFO - Epoch [96][100/101]	lr: 1.000e-04, eta: 3:47:57, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0016, loss_cls: 0.0564, acc: 97.5876, loss_bbox: 0.0222, loss: 0.0814
+2026-05-08 20:31:20,159 - mmdet - INFO - Epoch [97][50/101]	lr: 1.000e-04, eta: 3:47:25, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0017, loss_cls: 0.0555, acc: 97.5699, loss_bbox: 0.0242, loss: 0.0827
+2026-05-08 20:31:52,361 - mmdet - INFO - Epoch [97][100/101]	lr: 1.000e-04, eta: 3:46:50, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0020, loss_cls: 0.0531, acc: 97.7229, loss_bbox: 0.0211, loss: 0.0775
+2026-05-08 20:32:28,196 - mmdet - INFO - Epoch [98][50/101]	lr: 1.000e-04, eta: 3:46:19, time: 0.700, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0020, loss_cls: 0.0553, acc: 97.6561, loss_bbox: 0.0226, loss: 0.0812
+2026-05-08 20:33:00,311 - mmdet - INFO - Epoch [98][100/101]	lr: 1.000e-04, eta: 3:45:43, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0016, loss_cls: 0.0519, acc: 97.7627, loss_bbox: 0.0199, loss: 0.0741
+2026-05-08 20:33:35,912 - mmdet - INFO - Epoch [99][50/101]	lr: 1.000e-04, eta: 3:45:11, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0018, loss_cls: 0.0552, acc: 97.6509, loss_bbox: 0.0212, loss: 0.0795
+2026-05-08 20:34:07,891 - mmdet - INFO - Epoch [99][100/101]	lr: 1.000e-04, eta: 3:44:36, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0015, loss_cls: 0.0479, acc: 97.9514, loss_bbox: 0.0188, loss: 0.0690
+2026-05-08 20:34:43,540 - mmdet - INFO - Epoch [100][50/101]	lr: 1.000e-04, eta: 3:44:04, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0005, loss_rpn_bbox: 0.0014, loss_cls: 0.0497, acc: 97.8558, loss_bbox: 0.0186, loss: 0.0703
+2026-05-08 20:35:15,853 - mmdet - INFO - Epoch [100][100/101]	lr: 1.000e-04, eta: 3:43:29, time: 0.646, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0016, loss_cls: 0.0540, acc: 97.7214, loss_bbox: 0.0210, loss: 0.0774
+2026-05-08 20:35:16,642 - mmdet - INFO - Saving checkpoint at 100 epochs
+2026-05-08 20:35:56,748 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:35:59,839 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.297
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.678
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.208
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.062
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.246
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.365
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.428
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.428
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.428
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.097
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.367
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.512
+
+2026-05-08 20:36:00,046 - mmdet - INFO - The previous best checkpoint /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_swin_hbb/swin_t_hbb_fold_1/best_bbox_mAP_epoch_80.pth was removed
+2026-05-08 20:36:02,198 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_100.pth.
+2026-05-08 20:36:02,199 - mmdet - INFO - Best bbox_mAP is 0.2970 at 100 epoch.
+2026-05-08 20:36:02,199 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:36:02,199 - mmdet - INFO - Epoch(val) [100][371]	bbox_mAP: 0.2970, bbox_mAP_50: 0.6780, bbox_mAP_75: 0.2080, bbox_mAP_s: 0.0620, bbox_mAP_m: 0.2460, bbox_mAP_l: 0.3650, bbox_mAP_copypaste: 0.297 0.678 0.208 0.062 0.246 0.365
+2026-05-08 20:36:37,067 - mmdet - INFO - Epoch [101][50/101]	lr: 1.000e-04, eta: 3:42:57, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0017, loss_cls: 0.0525, acc: 97.7685, loss_bbox: 0.0210, loss: 0.0760
+2026-05-08 20:37:09,341 - mmdet - INFO - Epoch [101][100/101]	lr: 1.000e-04, eta: 3:42:22, time: 0.645, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0016, loss_cls: 0.0534, acc: 97.7065, loss_bbox: 0.0218, loss: 0.0776
+2026-05-08 20:37:44,997 - mmdet - INFO - Epoch [102][50/101]	lr: 1.000e-04, eta: 3:41:50, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0016, loss_cls: 0.0546, acc: 97.7289, loss_bbox: 0.0230, loss: 0.0799
+2026-05-08 20:38:17,220 - mmdet - INFO - Epoch [102][100/101]	lr: 1.000e-04, eta: 3:41:15, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0017, loss_cls: 0.0543, acc: 97.6957, loss_bbox: 0.0212, loss: 0.0780
+2026-05-08 20:38:52,891 - mmdet - INFO - Epoch [103][50/101]	lr: 1.000e-04, eta: 3:40:43, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0009, loss_rpn_bbox: 0.0017, loss_cls: 0.0551, acc: 97.6328, loss_bbox: 0.0224, loss: 0.0801
+2026-05-08 20:39:25,090 - mmdet - INFO - Epoch [103][100/101]	lr: 1.000e-04, eta: 3:40:08, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0016, loss_cls: 0.0511, acc: 97.7460, loss_bbox: 0.0196, loss: 0.0731
+2026-05-08 20:40:00,787 - mmdet - INFO - Epoch [104][50/101]	lr: 1.000e-04, eta: 3:39:36, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0006, loss_rpn_bbox: 0.0015, loss_cls: 0.0500, acc: 97.8829, loss_bbox: 0.0183, loss: 0.0705
+2026-05-08 20:40:32,850 - mmdet - INFO - Epoch [104][100/101]	lr: 1.000e-04, eta: 3:39:01, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0009, loss_rpn_bbox: 0.0018, loss_cls: 0.0587, acc: 97.4745, loss_bbox: 0.0231, loss: 0.0846
+2026-05-08 20:41:08,386 - mmdet - INFO - Epoch [105][50/101]	lr: 1.000e-04, eta: 3:38:28, time: 0.694, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0016, loss_cls: 0.0504, acc: 97.8583, loss_bbox: 0.0203, loss: 0.0734
+2026-05-08 20:41:40,332 - mmdet - INFO - Epoch [105][100/101]	lr: 1.000e-04, eta: 3:37:53, time: 0.639, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0016, loss_cls: 0.0557, acc: 97.6292, loss_bbox: 0.0220, loss: 0.0804
+2026-05-08 20:42:18,808 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:42:21,660 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.286
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.662
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.191
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.039
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.231
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.359
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.083
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.361
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.501
+
+2026-05-08 20:42:21,665 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:42:21,666 - mmdet - INFO - Epoch(val) [105][371]	bbox_mAP: 0.2860, bbox_mAP_50: 0.6620, bbox_mAP_75: 0.1910, bbox_mAP_s: 0.0390, bbox_mAP_m: 0.2310, bbox_mAP_l: 0.3590, bbox_mAP_copypaste: 0.286 0.662 0.191 0.039 0.231 0.359
+2026-05-08 20:42:56,524 - mmdet - INFO - Epoch [106][50/101]	lr: 1.000e-04, eta: 3:37:21, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0018, loss_cls: 0.0571, acc: 97.5831, loss_bbox: 0.0228, loss: 0.0825
+2026-05-08 20:43:28,516 - mmdet - INFO - Epoch [106][100/101]	lr: 1.000e-04, eta: 3:36:45, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0015, loss_cls: 0.0486, acc: 97.9825, loss_bbox: 0.0185, loss: 0.0696
+2026-05-08 20:44:04,244 - mmdet - INFO - Epoch [107][50/101]	lr: 1.000e-04, eta: 3:36:13, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0019, loss_cls: 0.0516, acc: 97.7817, loss_bbox: 0.0196, loss: 0.0742
+2026-05-08 20:44:36,350 - mmdet - INFO - Epoch [107][100/101]	lr: 1.000e-04, eta: 3:35:38, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0017, loss_cls: 0.0548, acc: 97.6859, loss_bbox: 0.0218, loss: 0.0793
+2026-05-08 20:45:11,984 - mmdet - INFO - Epoch [108][50/101]	lr: 1.000e-04, eta: 3:35:06, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0018, loss_cls: 0.0567, acc: 97.5870, loss_bbox: 0.0239, loss: 0.0835
+2026-05-08 20:45:44,051 - mmdet - INFO - Epoch [108][100/101]	lr: 1.000e-04, eta: 3:34:31, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0018, loss_cls: 0.0537, acc: 97.7455, loss_bbox: 0.0216, loss: 0.0781
+2026-05-08 20:46:19,683 - mmdet - INFO - Epoch [109][50/101]	lr: 1.000e-04, eta: 3:33:59, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0016, loss_cls: 0.0514, acc: 97.8367, loss_bbox: 0.0208, loss: 0.0749
+2026-05-08 20:46:51,736 - mmdet - INFO - Epoch [109][100/101]	lr: 1.000e-04, eta: 3:33:24, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0009, loss_rpn_bbox: 0.0016, loss_cls: 0.0508, acc: 97.8063, loss_bbox: 0.0203, loss: 0.0737
+2026-05-08 20:47:27,461 - mmdet - INFO - Epoch [110][50/101]	lr: 1.000e-04, eta: 3:32:52, time: 0.698, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0018, loss_rpn_bbox: 0.0018, loss_cls: 0.0515, acc: 97.7859, loss_bbox: 0.0209, loss: 0.0759
+2026-05-08 20:47:59,478 - mmdet - INFO - Epoch [110][100/101]	lr: 1.000e-04, eta: 3:32:16, time: 0.640, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0017, loss_rpn_bbox: 0.0021, loss_cls: 0.0538, acc: 97.6713, loss_bbox: 0.0208, loss: 0.0785
+2026-05-08 20:48:00,285 - mmdet - INFO - Saving checkpoint at 110 epochs
+2026-05-08 20:48:40,424 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:48:43,367 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.292
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.660
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.211
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.031
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.244
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.357
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.059
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.376
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.498
+
+2026-05-08 20:48:43,372 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:48:43,372 - mmdet - INFO - Epoch(val) [110][371]	bbox_mAP: 0.2920, bbox_mAP_50: 0.6600, bbox_mAP_75: 0.2110, bbox_mAP_s: 0.0310, bbox_mAP_m: 0.2440, bbox_mAP_l: 0.3570, bbox_mAP_copypaste: 0.292 0.660 0.211 0.031 0.244 0.357
+2026-05-08 20:49:18,106 - mmdet - INFO - Epoch [111][50/101]	lr: 1.000e-04, eta: 3:31:44, time: 0.694, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0016, loss_cls: 0.0503, acc: 97.8879, loss_bbox: 0.0183, loss: 0.0715
+2026-05-08 20:49:50,185 - mmdet - INFO - Epoch [111][100/101]	lr: 1.000e-04, eta: 3:31:09, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0011, loss_rpn_bbox: 0.0017, loss_cls: 0.0521, acc: 97.7649, loss_bbox: 0.0209, loss: 0.0759
+2026-05-08 20:50:25,743 - mmdet - INFO - Epoch [112][50/101]	lr: 1.000e-04, eta: 3:30:37, time: 0.695, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0015, loss_cls: 0.0524, acc: 97.7572, loss_bbox: 0.0210, loss: 0.0759
+2026-05-08 20:50:57,789 - mmdet - INFO - Epoch [112][100/101]	lr: 1.000e-04, eta: 3:30:02, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0048, loss_rpn_bbox: 0.0020, loss_cls: 0.0598, acc: 97.5152, loss_bbox: 0.0239, loss: 0.0905
+2026-05-08 20:51:33,549 - mmdet - INFO - Epoch [113][50/101]	lr: 1.000e-04, eta: 3:29:30, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0025, loss_rpn_bbox: 0.0022, loss_cls: 0.0595, acc: 97.4760, loss_bbox: 0.0242, loss: 0.0884
+2026-05-08 20:52:05,682 - mmdet - INFO - Epoch [113][100/101]	lr: 1.000e-04, eta: 3:28:55, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0014, loss_rpn_bbox: 0.0020, loss_cls: 0.0526, acc: 97.7222, loss_bbox: 0.0191, loss: 0.0752
+2026-05-08 20:52:41,450 - mmdet - INFO - Epoch [114][50/101]	lr: 1.000e-04, eta: 3:28:23, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0019, loss_cls: 0.0540, acc: 97.7027, loss_bbox: 0.0217, loss: 0.0797
+2026-05-08 20:53:13,627 - mmdet - INFO - Epoch [114][100/101]	lr: 1.000e-04, eta: 3:27:48, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0009, loss_rpn_bbox: 0.0023, loss_cls: 0.0546, acc: 97.6643, loss_bbox: 0.0200, loss: 0.0777
+2026-05-08 20:53:49,265 - mmdet - INFO - Epoch [115][50/101]	lr: 1.000e-04, eta: 3:27:16, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0016, loss_rpn_bbox: 0.0018, loss_cls: 0.0500, acc: 97.8875, loss_bbox: 0.0187, loss: 0.0722
+2026-05-08 20:54:21,387 - mmdet - INFO - Epoch [115][100/101]	lr: 1.000e-04, eta: 3:26:41, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0009, loss_rpn_bbox: 0.0018, loss_cls: 0.0544, acc: 97.7321, loss_bbox: 0.0216, loss: 0.0788
+2026-05-08 20:54:59,874 - mmdet - INFO - Evaluating bbox...
+2026-05-08 20:55:02,830 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.290
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.659
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.204
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.241
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.359
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.052
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.363
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.515
+
+2026-05-08 20:55:02,835 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 20:55:02,835 - mmdet - INFO - Epoch(val) [115][371]	bbox_mAP: 0.2900, bbox_mAP_50: 0.6590, bbox_mAP_75: 0.2040, bbox_mAP_s: 0.0220, bbox_mAP_m: 0.2410, bbox_mAP_l: 0.3590, bbox_mAP_copypaste: 0.290 0.659 0.204 0.022 0.241 0.359
+2026-05-08 20:55:37,778 - mmdet - INFO - Epoch [116][50/101]	lr: 1.000e-04, eta: 3:26:09, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0014, loss_cls: 0.0490, acc: 97.8849, loss_bbox: 0.0167, loss: 0.0678
+2026-05-08 20:56:09,990 - mmdet - INFO - Epoch [116][100/101]	lr: 1.000e-04, eta: 3:25:34, time: 0.644, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0016, loss_cls: 0.0519, acc: 97.7870, loss_bbox: 0.0193, loss: 0.0742
+2026-05-08 20:56:45,749 - mmdet - INFO - Epoch [117][50/101]	lr: 1.000e-04, eta: 3:25:02, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0015, loss_rpn_bbox: 0.0016, loss_cls: 0.0551, acc: 97.6918, loss_bbox: 0.0206, loss: 0.0788
+2026-05-08 20:57:17,788 - mmdet - INFO - Epoch [117][100/101]	lr: 1.000e-04, eta: 3:24:27, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0019, loss_rpn_bbox: 0.0018, loss_cls: 0.0507, acc: 97.8475, loss_bbox: 0.0204, loss: 0.0748
+2026-05-08 20:57:53,418 - mmdet - INFO - Epoch [118][50/101]	lr: 1.000e-04, eta: 3:23:54, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0015, loss_cls: 0.0499, acc: 97.8704, loss_bbox: 0.0187, loss: 0.0711
+2026-05-08 20:58:25,465 - mmdet - INFO - Epoch [118][100/101]	lr: 1.000e-04, eta: 3:23:19, time: 0.641, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0017, loss_cls: 0.0526, acc: 97.7659, loss_bbox: 0.0200, loss: 0.0755
+2026-05-08 20:59:01,052 - mmdet - INFO - Epoch [119][50/101]	lr: 1.000e-04, eta: 3:22:47, time: 0.696, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0012, loss_rpn_bbox: 0.0019, loss_cls: 0.0482, acc: 97.9568, loss_bbox: 0.0193, loss: 0.0706
+2026-05-08 20:59:33,562 - mmdet - INFO - Epoch [119][100/101]	lr: 1.000e-04, eta: 3:22:13, time: 0.650, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0006, loss_rpn_bbox: 0.0015, loss_cls: 0.0506, acc: 97.8608, loss_bbox: 0.0184, loss: 0.0711
+2026-05-08 21:00:09,199 - mmdet - INFO - Epoch [120][50/101]	lr: 1.000e-04, eta: 3:21:40, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0010, loss_rpn_bbox: 0.0017, loss_cls: 0.0507, acc: 97.8425, loss_bbox: 0.0196, loss: 0.0730
+2026-05-08 21:00:41,283 - mmdet - INFO - Epoch [120][100/101]	lr: 1.000e-04, eta: 3:21:06, time: 0.642, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0008, loss_rpn_bbox: 0.0014, loss_cls: 0.0466, acc: 98.0109, loss_bbox: 0.0162, loss: 0.0650
+2026-05-08 21:00:42,080 - mmdet - INFO - Saving checkpoint at 120 epochs
+2026-05-08 21:01:22,251 - mmdet - INFO - Evaluating bbox...
+2026-05-08 21:01:25,091 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.296
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.655
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.218
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.015
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.238
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.372
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.361
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.510
+
+2026-05-08 21:01:25,096 - mmdet - INFO - Exp name: fold_1_swin_t_3x_hbb.py
+2026-05-08 21:01:25,096 - mmdet - INFO - Epoch(val) [120][371]	bbox_mAP: 0.2960, bbox_mAP_50: 0.6550, bbox_mAP_75: 0.2180, bbox_mAP_s: 0.0150, bbox_mAP_m: 0.2380, bbox_mAP_l: 0.3720, bbox_mAP_copypaste: 0.296 0.655 0.218 0.015 0.238 0.372
+2026-05-08 21:02:00,080 - mmdet - INFO - Epoch [121][50/101]	lr: 1.000e-04, eta: 3:20:33, time: 0.699, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0015, loss_cls: 0.0497, acc: 97.8992, loss_bbox: 0.0188, loss: 0.0706
+2026-05-08 21:02:32,250 - mmdet - INFO - Epoch [121][100/101]	lr: 1.000e-04, eta: 3:19:59, time: 0.643, data_time: 0.013, memory: 7332, loss_rpn_cls: 0.0006, loss_rpn_bbox: 0.0016, loss_cls: 0.0489, acc: 97.9273, loss_bbox: 0.0183, loss: 0.0695
+2026-05-08 21:03:07,928 - mmdet - INFO - Epoch [122][50/101]	lr: 1.000e-04, eta: 3:19:26, time: 0.697, data_time: 0.066, memory: 7332, loss_rpn_cls: 0.0006, loss_rpn_bbox: 0.0016, loss_cls: 0.0503, acc: 97.8467, loss_bbox: 0.0177, loss: 0.0701

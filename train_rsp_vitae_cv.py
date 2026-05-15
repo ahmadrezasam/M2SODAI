@@ -1,29 +1,24 @@
 import os
 import subprocess
 import time
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train RSP ViTAE with Cross-Validation')
+    parser.add_argument('--batch_size', type=int, default=2, help='Batch size per GPU')
+    parser.add_argument('--epochs', type=int, default=300, help='Total training epochs')
+    parser.add_argument('--eval_interval', type=int, default=10, help='Evaluation interval')
+    return parser.parse_args()
 
 def train_rsp_vitae_3fold():
-    """
-    This script automates the 3-fold cross-validation training for RSP-ViTAEv2-S
-    using the OBBDetection/RSP framework, matching the logic of train_rtdetr_cv.py.
+    args = parse_args()
     
-    IMPORTANT PREREQUISITES:
-    1. You must clone the RSP repository and install OBBDetection (mmcv, mmdet, BboxToolkit).
-    2. You must convert your fold_1, fold_2, fold_3 data into DOTA format 
-       (since OBBDetection expects DOTA-style labels, not YOLO txt files).
-    3. You must create 3 config files (one for each fold) based on the original:
-       'configs/obb/oriented_rcnn/faster_rcnn_orpn_our_rsp_vitae_fpn_3x_hrsc.py'
-    """
-    
-    # Path to the RSP/OBBDetection root directory (User must update this)
-    # Example: '/home/ahmadreza/Downloads/Research/RSP/Object Detection'
-    rsp_root_dir = "./RSP_Object_Detection" 
+    # Path to the RSP/OBBDetection root directory
+    rsp_root_dir = "." 
     
     # Where to save the results
     base_dir = "baseline_official"
-    project_name = os.path.abspath(os.path.join(base_dir, 'runs_rsp_vitae'))
-    
-    epochs = 36 # In mmdet, 3x schedule is usually 36 epochs. 
+    project_name = os.path.abspath(os.path.join(base_dir, 'runs_vitae_hbb'))
     
     folds = [1, 2, 3]
 
@@ -32,50 +27,52 @@ def train_rsp_vitae_3fold():
 
     for fold in folds:
         print(f"\n{'='*50}")
-        print(f"STARTING TRAINING FOR FOLD {fold}")
+        print(f"STARTING TRAINING FOR FOLD {fold} (ViTAE-Tiny)")
         print(f"{'='*50}\n")
         
-        # In MMDet/OBBDetection, everything is controlled by a config file.
-        # You must create these config files manually where data paths point to Fold 1, 2, or 3.
-        config_path = os.path.join(rsp_root_dir, f"configs/obb/oriented_rcnn/fold_{fold}_rsp_vitae_fpn_3x.py")
+        # Tiny Config Path
+        config_path = f"configs/faster_rcnn/fold_{fold}_vitae_t_3x_hbb.py"
         
         # Directory to save the weights and logs for this fold
-        work_dir = os.path.join(project_name, f"vitae_s_fold_{fold}")
+        work_dir = os.path.join(project_name, f"vitae_t_hbb_fold_{fold}")
         
-        # The training command using torch.distributed.launch (as required by RSP)
-        # We use subprocess to call the training tool
+        # The training command using torch.distributed.launch
         train_cmd = [
             "python", "-m", "torch.distributed.launch", 
-            "--nproc_per_node=1", # Change to number of GPUs you have
-            "--master_port=50002", 
+            "--nproc_per_node=1", 
+            "--master_port=50011", 
             os.path.join(rsp_root_dir, "tools/train.py"),
             config_path,
             "--work-dir", work_dir,
             "--launcher", "pytorch",
-            "--options", "find_unused_parameters=True"
+            "--cfg-options", 
+            f"runner.max_epochs={args.epochs}",
+            f"data.samples_per_gpu={args.batch_size}",
+            f"evaluation.interval={args.eval_interval}"
         ]
         
         print(f"Executing command:\n{' '.join(train_cmd)}\n")
         
-        # Wait for user to ensure config exists (optional safeguard)
         if not os.path.exists(config_path):
             print(f"WARNING: Config file not found: {config_path}")
-            print("Please create the config file pointing to this fold's dataset.")
-            break
+            continue
             
         try:
-            # Run the training process
             subprocess.run(train_cmd, check=True)
             print(f"\nFinished training Fold {fold} successfully.\n")
             
         except subprocess.CalledProcessError as e:
             print(f"\nError during training Fold {fold}: {e}")
             break
-            
-        # Give the system a moment to clean up resources
-        time.sleep(5)
+        
+        # --- Memory Cleanup Logic ---
+        # 1. Subprocess exit automatically clears GPU VRAM.
+        # 2. We wait a bit longer to ensure the GPU driver has fully released all handles.
+        # 3. We trigger Python's garbage collector for the orchestrator itself.
+        print(f"Cleaning up memory and cooling down for 15 seconds...")
+        import gc
+        gc.collect() 
+        time.sleep(15)
 
 if __name__ == "__main__":
-    print("NOTE: OBBDetection does not use a simple Python API like Ultralytics.")
-    print("This script uses subprocess to call the training tools.")
     train_rsp_vitae_3fold()

@@ -11,3 +11,5 @@ __all__ = [
     'center_of_mass', 'generate_coordinate', 'select_single_mlvl',
     'filter_scores_and_topk', 'sync_random_seed'
 ]
+from .early_stopping_hook import EarlyStoppingHook
+__all__ += ['EarlyStoppingHook']

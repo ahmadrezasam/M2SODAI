@@ -1,0 +1,38 @@
+/home/ahmadreza/Downloads/Research/M2SODAI/mmdet/utils/setup_env.py:33: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  f'Setting OMP_NUM_THREADS environment variable for each process '
+/home/ahmadreza/Downloads/Research/M2SODAI/mmdet/utils/setup_env.py:43: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  f'Setting MKL_NUM_THREADS environment variable for each process '
+Traceback (most recent call last):
+  File "./tools/train.py", line 221, in <module>
+    main()
+  File "./tools/train.py", line 151, in main
+    init_dist(args.launcher, **cfg.dist_params)
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/site-packages/mmcv/runner/dist_utils.py", line 18, in init_dist
+    _init_dist_pytorch(backend, **kwargs)
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/site-packages/mmcv/runner/dist_utils.py", line 32, in _init_dist_pytorch
+    dist.init_process_group(backend=backend, **kwargs)
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/site-packages/torch/distributed/distributed_c10d.py", line 436, in init_process_group
+    store, rank, world_size = next(rendezvous_iterator)
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/site-packages/torch/distributed/rendezvous.py", line 179, in _env_rendezvous_handler
+    store = TCPStore(master_addr, master_port, world_size, start_daemon, timeout)
+RuntimeError: Address already in use
+Traceback (most recent call last):
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/site-packages/torch/distributed/launch.py", line 260, in <module>
+    main()
+  File "/home/ahmadreza/miniconda3/envs/Maritime/lib/python3.7/site-packages/torch/distributed/launch.py", line 256, in main
+    cmd=cmd)
+subprocess.CalledProcessError: Command '['/home/ahmadreza/miniconda3/envs/Maritime/bin/python', '-u', './tools/train.py', '--local_rank=0', 'configs/faster_rcnn/fold_1_r50_300e_hbb.py', '--work-dir', '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_r50_hbb/r50_hbb_fold_1_20260511', '--launcher', 'pytorch', '--cfg-options', 'runner.max_epochs=300', 'data.samples_per_gpu=4', 'evaluation.interval=10']' returned non-zero exit status 1.
+
+==================================================
+STARTING TRAINING FOR FOLD 1 (Faster R-CNN R50)
+==================================================
+
+Executing command:
+/home/ahmadreza/miniconda3/envs/Maritime/bin/python -m torch.distributed.launch --nproc_per_node=1 --master_port=50016 ./tools/train.py configs/faster_rcnn/fold_1_r50_300e_hbb.py --work-dir /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_r50_hbb/r50_hbb_fold_1_20260511 --launcher pytorch --cfg-options runner.max_epochs=300 data.samples_per_gpu=4 evaluation.interval=10
+
+
+Error during training Fold 1: Command '['/home/ahmadreza/miniconda3/envs/Maritime/bin/python', '-m', 'torch.distributed.launch', '--nproc_per_node=1', '--master_port=50016', './tools/train.py', 'configs/faster_rcnn/fold_1_r50_300e_hbb.py', '--work-dir', '/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/runs_r50_hbb/r50_hbb_fold_1_20260511', '--launcher', 'pytorch', '--cfg-options', 'runner.max_epochs=300', 'data.samples_per_gpu=4', 'evaluation.interval=10']' returned non-zero exit status 1.

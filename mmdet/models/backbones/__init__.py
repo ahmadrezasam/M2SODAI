@@ -18,6 +18,7 @@ from .swin import SwinTransformer
 from .trident_resnet import TridentResNet
 from .project_upsample_resnet import ProjectUpsampleResNet
 from .cascaded_project_upsample_resnet import CascadedProjectUpsampleResNet
+from .ViTAE_Window_NoShift import ViTAE_Window_NoShift_basic
 
 __all__ = [
     'RegNet', 'ResNet', 'ResNetV1d', 'ResNeXt', 'SSDVGG', 'HRNet',
@@ -25,5 +26,5 @@ __all__ = [
     'DetectoRS_ResNeXt', 'Darknet', 'ResNeSt', 'TridentResNet', 'CSPDarknet',
     'SwinTransformer', 'PyramidVisionTransformer',
     'PyramidVisionTransformerV2', 'EfficientNet', 'ProjectUpsampleResNet',
-    'CascadedProjectUpsampleResNet'
+    'CascadedProjectUpsampleResNet', 'ViTAE_Window_NoShift_basic'
 ]

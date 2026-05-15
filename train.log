@@ -1,0 +1,78 @@
+Ultralytics 8.4.31 🚀 Python-3.13.11 torch-2.10.0+cu128 CUDA:0 (NVIDIA GeForce RTX 2080 Ti, 10818MiB)
+[34m[1mengine/trainer: [0magnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=8, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=/home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/yolo26_fold2_obb.yaml, degrees=0.0, deterministic=True, device=None, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=90, erasing=0.4, exist_ok=False, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=yolo26s-obb.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=train5, nbs=64, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=100, perspective=0.0, plots=True, pose=12.0, pretrained=True, profile=False, project=None, rect=False, resume=False, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=/home/ahmadreza/Downloads/Research/M2SODAI/mmdet/models/LMW-YOLO/runs/obb/train5, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=0, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=obb, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.1, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.0005, workers=8, workspace=None
+Overriding model.yaml nc=15 with nc=1
+
+                   from  n    params  module                                       arguments                     
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]                 
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]                
+  2                  -1  1     26080  ultralytics.nn.modules.block.C3k2            [64, 128, 1, False, 0.25]     
+  3                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]              
+  4                  -1  1    103360  ultralytics.nn.modules.block.C3k2            [128, 256, 1, False, 0.25]    
+  5                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]              
+  6                  -1  1    346112  ultralytics.nn.modules.block.C3k2            [256, 256, 1, True]           
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]              
+  8                  -1  1   1380352  ultralytics.nn.modules.block.C3k2            [512, 512, 1, True]           
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5, 3, True]        
+ 10                  -1  1    990976  ultralytics.nn.modules.block.C2PSA           [512, 512, 1]                 
+ 11                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 12             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 13                  -1  1    477184  ultralytics.nn.modules.block.C3k2            [768, 256, 1, True]           
+ 14                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 15             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 16                  -1  1    136192  ultralytics.nn.modules.block.C3k2            [512, 128, 1, True]           
+ 17                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]              
+ 18            [-1, 13]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 19                  -1  1    378880  ultralytics.nn.modules.block.C3k2            [384, 256, 1, True]           
+ 20                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]              
+ 21            [-1, 10]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 22                  -1  1   1843712  ultralytics.nn.modules.block.C3k2            [768, 512, 1, True, 0.5, True]
+ 23        [16, 19, 22]  1   1504996  ultralytics.nn.modules.head.OBB26            [1, 1, 1, True, [128, 256, 512]]
+YOLO26s-obb summary: 291 layers, 10,520,996 parameters, 10,520,996 gradients, 24.5 GFLOPs
+
+Transferred 780/792 items from pretrained weights
+[34m[1mAMP: [0mrunning Automatic Mixed Precision (AMP) checks...
+[34m[1mAMP: [0mchecks passed ✅
+[34m[1mtrain: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1135.8±1080.9 MB/s, size: 267.6 KB)
+[K[34m[1mtrain: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/train/labels.cache... 741 images, 339 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 741/741 115.1Mit/s 0.0s
+[34m[1malbumentations: [0mBlur(p=0.01, blur_limit=(3, 7)), MedianBlur(p=0.01, blur_limit=(3, 7)), ToGray(p=0.01, method='weighted_average', num_output_channels=3), CLAHE(p=0.01, clip_limit=(1.0, 4.0), tile_grid_size=(8, 8))
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 190.7±40.4 MB/s, size: 204.8 KB)
+[K[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels... 52 images, 25 backgrounds, 0 corrupt: 14% ━╸────────── 52/371 155.0it/s 0.1s<2.1s[K[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels... 133 images, 51 backgrounds, 0 corrupt: 36% ━━━━──────── 133/371 348.5it/s 0.2s<0.7s[K[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels... 232 images, 97 backgrounds, 0 corrupt: 63% ━━━━━━━╸──── 232/371 530.3it/s 0.3s<0.3s[K[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels... 273 images, 119 backgrounds, 0 corrupt: 74% ━━━━━━━━╸─── 273/371 489.0it/s 0.4s<0.2s[K[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels... 318 images, 150 backgrounds, 0 corrupt: 86% ━━━━━━━━━━── 318/371 475.5it/s 0.5s<0.1s[K[34m[1mval: [0mScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels... 371 images, 169 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 371/371 621.3it/s 0.6s
+[34m[1mval: [0mNew cache created: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/val/labels.cache
+[34m[1moptimizer:[0m 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically... 
+[34m[1moptimizer:[0m AdamW(lr=0.002, momentum=0.9) with parameter groups 126 weight(decay=0.0), 144 weight(decay=0.0005), 144 bias(decay=0.0)
+Plotting labels to /home/ahmadreza/Downloads/Research/M2SODAI/mmdet/models/LMW-YOLO/runs/obb/train5/labels.jpg... 
+Fast image access ✅ (ping: 0.0±0.0 ms, read: 1644.6±1557.9 MB/s, size: 308.6 KB)
+[KScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/fold_2_obb/train/labels.cache... 741 images, 339 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 741/741 62.2Mit/s 0.0s
+[34m[1malbumentations: [0mBlur(p=0.01, blur_limit=(3, 7)), MedianBlur(p=0.01, blur_limit=(3, 7)), ToGray(p=0.01, method='weighted_average', num_output_channels=3), CLAHE(p=0.01, clip_limit=(1.0, 4.0), tile_grid_size=(8, 8))
+Fast image access ✅ (ping: 0.0±0.0 ms, read: 222.2±226.4 MB/s, size: 25.7 KB)
+[KScanning /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/hsi_rgb_640_v3_bilinear_obb/labels/train.cache... 715 images, 330 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 715/715 199.9Mit/s 0.0s
+Traceback (most recent call last):
+  File "/home/ahmadreza/Downloads/Research/M2SODAI/train_yolo26s_obb_online_mt.py", line 80, in <module>
+    train_mt()
+    ~~~~~~~~^^
+  File "/home/ahmadreza/Downloads/Research/M2SODAI/train_yolo26s_obb_online_mt.py", line 68, in train_mt
+    mt_trainer = OnlineMeanTeacherTrainer(
+        student_model=student,
+    ...<4 lines>...
+        device='cpu' # Use cpu for stability first, then move to cuda if available
+    )
+  File "/home/ahmadreza/Downloads/Research/M2SODAI/uda/online_mean_teacher.py", line 29, in __init__
+    self.teacher.load_state_dict(self.student.state_dict())
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmadreza/miniconda3/lib/python3.13/site-packages/torch/nn/modules/module.py", line 2635, in load_state_dict
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: Error(s) in loading state_dict for OBBModel:
+	size mismatch for model.23.cv3.0.2.weight: copying a param with shape torch.Size([1, 128, 1, 1]) from checkpoint, the shape in current model is torch.Size([15, 128, 1, 1]).
+	size mismatch for model.23.cv3.0.2.bias: copying a param with shape torch.Size([1]) from checkpoint, the shape in current model is torch.Size([15]).
+	size mismatch for model.23.cv3.1.2.weight: copying a param with shape torch.Size([1, 128, 1, 1]) from checkpoint, the shape in current model is torch.Size([15, 128, 1, 1]).
+	size mismatch for model.23.cv3.1.2.bias: copying a param with shape torch.Size([1]) from checkpoint, the shape in current model is torch.Size([15]).
+	size mismatch for model.23.cv3.2.2.weight: copying a param with shape torch.Size([1, 128, 1, 1]) from checkpoint, the shape in current model is torch.Size([15, 128, 1, 1]).
+	size mismatch for model.23.cv3.2.2.bias: copying a param with shape torch.Size([1]) from checkpoint, the shape in current model is torch.Size([15]).
+	size mismatch for model.23.one2one_cv3.0.2.weight: copying a param with shape torch.Size([1, 128, 1, 1]) from checkpoint, the shape in current model is torch.Size([15, 128, 1, 1]).
+	size mismatch for model.23.one2one_cv3.0.2.bias: copying a param with shape torch.Size([1]) from checkpoint, the shape in current model is torch.Size([15]).
+	size mismatch for model.23.one2one_cv3.1.2.weight: copying a param with shape torch.Size([1, 128, 1, 1]) from checkpoint, the shape in current model is torch.Size([15, 128, 1, 1]).
+	size mismatch for model.23.one2one_cv3.1.2.bias: copying a param with shape torch.Size([1]) from checkpoint, the shape in current model is torch.Size([15]).
+	size mismatch for model.23.one2one_cv3.2.2.weight: copying a param with shape torch.Size([1, 128, 1, 1]) from checkpoint, the shape in current model is torch.Size([15, 128, 1, 1]).
+	size mismatch for model.23.one2one_cv3.2.2.bias: copying a param with shape torch.Size([1]) from checkpoint, the shape in current model is torch.Size([15]).
