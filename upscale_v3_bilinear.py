@@ -29,8 +29,8 @@ def upscale_v3_bilinear():
                 hsi_img_anns[iid] = []
             hsi_img_anns[iid].append(ann)
 
-    # GLOBAL ROBUST MAX (updated from analysis)
-    GLOBAL_MAX = 0.85
+    # GLOBAL ROBUST MAX (matching v3)
+    GLOBAL_MAX = 0.30
     GLOBAL_MIN = 0.0
     
     print(f"Generating 'v3-Bilinear' Dataset (Bilinear + Global Normalization)...")

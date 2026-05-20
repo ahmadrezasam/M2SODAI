@@ -2,6 +2,7 @@ work_dirs
 data
 *.pyc
 *.pth
+*.pt
 .venv/
 baseline_official/fold_1*
 baseline_official/fold_2*
@@ -9,14 +10,13 @@ baseline_official/fold_3*
 baseline_official/test_hsi_pca
 *.jpg
 *.png
-*.pt
 
 
 ----------
 uda
 repro_uda
-!best.pt
-!last.pt
+# !best.pt
+# !last.pt
 
 baseline_official/test_hsi_rgb_640_v3_bilinear
 baseline_official/test_hsi_rgb_640_v3_bilinear_obb

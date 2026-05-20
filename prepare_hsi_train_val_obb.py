@@ -10,8 +10,8 @@ PROJECT_ROOT = "/home/ahmadreza/Downloads/Research/M2SODAI"
 DATA_ROOT = os.path.join(PROJECT_ROOT, "data")
 OUTPUT_ROOT = os.path.join(PROJECT_ROOT, "baseline_official", "hsi_rgb_640_v3_bilinear_obb")
 
-# Global Stats (derived from analysis)
-GLOBAL_MAX = 0.85
+# Global Stats (matching v3 contrast)
+GLOBAL_MAX = 0.30
 GLOBAL_MIN = 0.0
 
 def process_split(split_name):
