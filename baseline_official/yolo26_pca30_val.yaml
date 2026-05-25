@@ -1,0 +1,5 @@
+path: /home/ahmadreza/Downloads/Research/M2SODAI/baseline_official/hsi_pca_30ch_eval
+train: val/images
+val: val/images
+names:
+  0: ship

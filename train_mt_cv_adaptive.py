@@ -1,10 +1,24 @@
-"""
-Launch script for online Mean Teacher Unsupervised Domain Adaptation (UDA) on Folds 2 and 3.
-Uses the highly successful adaptive sweet-spot sweep settings validated on Fold 1.
-"""
-
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 import sys
+import cv2
+import torch
+import torch.multiprocessing as mp
+
+# Disable OpenCV multithreading to prevent memory leaks in dataloader workers
+cv2.setNumThreads(0)
+
+# Set sharing strategy to 'file_system' to prevent shared memory (/dev/shm) exhaustion crashes when using workers > 0
+mp.set_sharing_strategy('file_system')
+
+# Set number of PyTorch CPU threads to 1 to prevent CPU core over-subscription and thrashing inside worker processes
+torch.set_num_threads(1)
+
 from uda.mt_obb_trainer import MeanTeacherOBBTrainer
 
 def run_fold(fold_num):
@@ -44,7 +58,7 @@ def run_fold(fold_num):
         "cos_lr": True,
         "lr0": 0.0001,               # Stable learning rate
         "optimizer": "AdamW",        # Explicitly set to AdamW
-        "workers": 4,                # Optimize worker thread count to prevent CPU/IO deadlocks
+        "workers": 0,                # Set to 0 to run everything in the main process, eliminating multiprocessing OOM leaks
     }
 
     trainer = MeanTeacherOBBTrainer(
